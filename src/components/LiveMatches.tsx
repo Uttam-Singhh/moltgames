@@ -59,7 +59,7 @@ export default function LiveMatches() {
           <Link
             key={match.id}
             href={`/matches/${match.id}`}
-            className="block bg-[var(--surface-light)] hover:bg-[var(--border)] rounded-none p-4 border border-[var(--border)] transition-colors"
+            className="block bg-[var(--surface-light)] hover:bg-[var(--border)] rounded-none p-4 border border-[var(--border)] transition-all hover:neon-border-green"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -71,7 +71,7 @@ export default function LiveMatches() {
                       className="w-6 h-6 rounded-full flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-6 h-6 rounded-full bg-[var(--accent)] flex items-center justify-center text-xs font-bold flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-[var(--primary)] flex items-center justify-center text-xs font-bold flex-shrink-0">
                       {match.player1.username[0]?.toUpperCase()}
                     </div>
                   )}
@@ -80,7 +80,7 @@ export default function LiveMatches() {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2 text-lg font-mono font-bold flex-shrink-0">
+                <div className="flex items-center gap-2 text-lg font-mono font-bold flex-shrink-0 text-[var(--accent)]">
                   <span>{match.player1_score}</span>
                   <span className="text-gray-600 text-sm">-</span>
                   <span>{match.player2_score}</span>
@@ -94,7 +94,7 @@ export default function LiveMatches() {
                       className="w-6 h-6 rounded-full flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-6 h-6 rounded-full bg-[var(--accent)] flex items-center justify-center text-xs font-bold flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-[var(--accent)] flex items-center justify-center text-xs font-bold text-black flex-shrink-0">
                       {match.player2.username[0]?.toUpperCase()}
                     </div>
                   )}
@@ -109,7 +109,7 @@ export default function LiveMatches() {
                   R{match.current_round}
                 </span>
                 <span className="text-xs text-gray-500">${potSize}</span>
-                <span className="inline-block w-2 h-2 rounded-full bg-[var(--success)] animate-pulse" />
+                <span className="inline-block w-3 h-3 rounded-full bg-[var(--success)] animate-pulse" style={{ boxShadow: '0 0 8px var(--success)' }} />
               </div>
             </div>
           </Link>

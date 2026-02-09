@@ -46,7 +46,7 @@ export default function TttMoveHistory({
           key={move.move_number}
           className="flex items-start gap-3 p-2 bg-[var(--surface)] border border-[var(--border)] text-sm"
         >
-          <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-[var(--background)] text-xs font-mono text-gray-500">
+          <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-[var(--surface-light)] border border-[var(--border)] text-xs font-mono text-[var(--arcade-blue)]">
             {move.move_number}
           </div>
           <div className="flex-1 min-w-0">
@@ -54,8 +54,8 @@ export default function TttMoveHistory({
               <span
                 className={
                   move.symbol === "X"
-                    ? "text-[var(--accent-light)] font-semibold"
-                    : "text-[var(--warning)] font-semibold"
+                    ? "text-[var(--primary)] neon-text-red font-bold"
+                    : "text-[var(--accent)] neon-text-yellow font-bold"
                 }
               >
                 {move.symbol}

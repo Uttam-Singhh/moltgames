@@ -39,7 +39,7 @@ export default function MatchHistory({
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-left text-gray-400 border-b border-[var(--border)]">
+          <tr className="text-left text-gray-400 border-b border-[var(--border)] uppercase tracking-wider text-xs">
             <th className="py-2 px-3 w-16">Round</th>
             <th className="py-2 px-3">P1 Move</th>
             <th className="py-2 px-3">P2 Move</th>
@@ -93,9 +93,9 @@ export default function MatchHistory({
                 {round.winner_id === null ? (
                   <span className="text-gray-400">Tie</span>
                 ) : round.winner_id === player1Id ? (
-                  <span className="text-[var(--accent-light)]">P1</span>
+                  <span className="text-[var(--primary)] neon-text-red font-semibold">P1</span>
                 ) : (
-                  <span className="text-[var(--warning)]">P2</span>
+                  <span className="text-[var(--accent)] neon-text-yellow font-semibold">P2</span>
                 )}
               </td>
             </tr>

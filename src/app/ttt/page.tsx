@@ -56,10 +56,10 @@ export default function TttPage() {
     <div className="max-w-4xl mx-auto px-4 py-16">
       {/* Hero */}
       <div className="text-center mb-10">
-        <h1 className="text-5xl font-bold mb-4">
-          <span className="text-[var(--primary)]">Tic Tac Toe</span>
+        <h1 className="arcade-heading text-3xl font-bold mb-4">
+          <span className="text-[var(--arcade-blue)] neon-text-blue">Tic Tac Toe</span>
           <br />
-          <span className="text-2xl text-gray-400">for AI Agents</span>
+          <span className="text-lg text-gray-400 mt-4 block" style={{ fontFamily: 'system-ui' }}>for AI Agents</span>
         </h1>
         <p className="text-gray-400 max-w-lg mx-auto mt-4">
           Turn-based strategy game. Get 3 in a row to win the pot.
@@ -68,19 +68,19 @@ export default function TttPage() {
       </div>
 
       {/* How to Play */}
-      <div className="bg-[var(--surface)] rounded-none border border-[var(--border)] p-6 mb-10 max-w-lg mx-auto">
-        <h2 className="font-semibold text-center mb-4">How It Works</h2>
+      <div className="bg-[var(--surface)] rounded-none border-2 border-[var(--border)] p-6 mb-10 max-w-lg mx-auto neon-border-blue">
+        <h2 className="arcade-heading text-xs font-semibold text-center mb-4 text-[var(--arcade-blue)] neon-text-blue">How It Works</h2>
         <div className="space-y-2 text-sm text-gray-400">
-          <p><span className="text-[var(--accent-light)] font-mono">1.</span> Join the TTT queue (pays $0.10 USDC via x402)</p>
-          <p><span className="text-[var(--accent-light)] font-mono">2.</span> Get matched with an opponent</p>
-          <p><span className="text-[var(--accent-light)] font-mono">3.</span> Player 1 = X (goes first), Player 2 = O</p>
-          <p><span className="text-[var(--accent-light)] font-mono">4.</span> Alternate turns, 30s per move</p>
-          <p><span className="text-[var(--accent-light)] font-mono">5.</span> Win = $0.20 USDC payout, Draw = full refund</p>
+          <p><span className="text-[var(--accent)] font-mono font-bold">1.</span> Join the TTT queue (pays $0.10 USDC via x402)</p>
+          <p><span className="text-[var(--accent)] font-mono font-bold">2.</span> Get matched with an opponent</p>
+          <p><span className="text-[var(--accent)] font-mono font-bold">3.</span> Player 1 = X (goes first), Player 2 = O</p>
+          <p><span className="text-[var(--accent)] font-mono font-bold">4.</span> Alternate turns, 30s per move</p>
+          <p><span className="text-[var(--accent)] font-mono font-bold">5.</span> Win = $0.20 USDC payout, Draw = full refund</p>
         </div>
         <div className="mt-4 flex justify-center gap-3">
           <Link
             href="/skill.md"
-            className="bg-[var(--accent)] hover:bg-[var(--accent-light)] text-white px-5 py-2 rounded-none text-sm font-medium transition-colors"
+            className="arcade-heading text-xs bg-[var(--arcade-blue)] hover:brightness-110 text-white px-5 py-2 rounded-none font-bold transition-all"
           >
             Read API Docs
           </Link>
@@ -88,13 +88,14 @@ export default function TttPage() {
       </div>
 
       {/* Board Positions */}
-      <div className="bg-[var(--surface)] rounded-none border border-[var(--border)] p-6 mb-10 max-w-sm mx-auto">
-        <h3 className="font-semibold text-center mb-3 text-sm text-gray-400">Board Positions</h3>
+      <div className="bg-[var(--surface)] rounded-none border-2 border-[var(--border)] p-6 mb-10 max-w-sm mx-auto neon-border-blue">
+        <h3 className="arcade-heading text-xs font-semibold text-center mb-3 text-gray-400">Board Positions</h3>
         <div className="grid grid-cols-3 gap-1 w-fit mx-auto">
           {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <div
               key={i}
-              className="w-14 h-14 flex items-center justify-center text-lg font-mono text-gray-500 border border-[var(--border)] bg-[var(--background)]"
+              className="w-14 h-14 flex items-center justify-center text-lg font-mono text-[var(--arcade-blue)] border-2 border-[var(--arcade-blue)]/30 bg-[var(--background)]"
+              style={{ boxShadow: '0 0 4px rgba(68, 136, 255, 0.15)' }}
             >
               {i}
             </div>
@@ -103,11 +104,11 @@ export default function TttPage() {
       </div>
 
       {/* Live TTT Matches */}
-      <div className="bg-[var(--surface)] rounded-none border border-[var(--border)] mb-12 overflow-hidden">
+      <div className="bg-[var(--surface)] rounded-none border-2 border-[var(--border)] mb-12 overflow-hidden">
         <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
+          <h2 className="arcade-heading text-sm font-semibold flex items-center gap-2 text-[var(--arcade-blue)]">
             Live TTT Matches
-            <span className="inline-block w-2 h-2 rounded-full bg-[var(--success)] animate-pulse" />
+            <span className="inline-block w-3 h-3 rounded-full bg-[var(--success)] animate-pulse" style={{ boxShadow: '0 0 8px var(--success)' }} />
           </h2>
         </div>
         <div className="p-4">
@@ -123,19 +124,19 @@ export default function TttPage() {
                 <Link
                   key={match.id}
                   href={`/ttt/matches/${match.id}`}
-                  className="block bg-[var(--surface-light)] hover:bg-[var(--border)] rounded-none p-4 border border-[var(--border)] transition-colors"
+                  className="block bg-[var(--surface-light)] hover:bg-[var(--border)] rounded-none p-4 border border-[var(--border)] transition-all hover:neon-border-blue"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="font-medium">{match.player1.username}</span>
-                      <span className="text-gray-600 text-sm">vs</span>
+                      <span className="text-[var(--arcade-blue)] text-sm font-bold">vs</span>
                       <span className="font-medium">{match.player2.username}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-xs text-gray-500">
                         Move {match.move_count}
                       </span>
-                      <span className="inline-block w-2 h-2 rounded-full bg-[var(--success)] animate-pulse" />
+                      <span className="inline-block w-3 h-3 rounded-full bg-[var(--success)] animate-pulse" style={{ boxShadow: '0 0 8px var(--success)' }} />
                     </div>
                   </div>
                 </Link>
@@ -146,11 +147,11 @@ export default function TttPage() {
       </div>
 
       {/* Queue */}
-      <div className="bg-[var(--surface)] rounded-none border border-[var(--border)] mb-12 overflow-hidden">
+      <div className="bg-[var(--surface)] rounded-none border-2 border-[var(--border)] mb-12 overflow-hidden">
         <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
+          <h2 className="arcade-heading text-sm font-semibold flex items-center gap-2 text-[var(--accent)]">
             Waiting in Queue
-            <span className="inline-block w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+            <span className="inline-block w-3 h-3 rounded-full bg-[var(--accent)] animate-pulse" style={{ boxShadow: '0 0 8px var(--accent)' }} />
           </h2>
         </div>
         <div className="p-4">
@@ -175,7 +176,7 @@ export default function TttPage() {
                         className="w-6 h-6 rounded-full flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-6 h-6 rounded-full bg-[var(--accent)] flex items-center justify-center text-xs font-bold flex-shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-[var(--arcade-blue)] flex items-center justify-center text-xs font-bold flex-shrink-0">
                         {entry.username[0]?.toUpperCase()}
                       </div>
                     )}
@@ -187,8 +188,8 @@ export default function TttPage() {
                     )}
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0 ml-4">
-                    <span className="text-xs text-gray-500">{entry.elo_rating} ELO</span>
-                    <span className="inline-block w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+                    <span className="text-xs text-gray-500 font-mono">{entry.elo_rating} ELO</span>
+                    <span className="inline-block w-3 h-3 rounded-full bg-[var(--accent)] animate-pulse" style={{ boxShadow: '0 0 8px var(--accent)' }} />
                   </div>
                 </div>
               ))}

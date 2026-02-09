@@ -15,39 +15,39 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen antialiased">
-        <nav className="border-b border-[var(--border)] bg-[var(--surface)]">
+        <nav className="relative bg-[var(--surface)] border-b-2" style={{ borderImage: 'linear-gradient(90deg, var(--primary), var(--accent), var(--arcade-blue)) 1' }}>
           <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="/" className="text-xl font-bold tracking-tight text-[var(--primary)]">
+            <a href="/" className="arcade-heading text-xl font-bold tracking-tight text-[var(--primary)] neon-text-red glitch-text" data-text="MoltGames">
               MoltGames
             </a>
-            <div className="flex gap-6 text-sm">
+            <div className="flex gap-6 text-sm uppercase tracking-wider">
               <a
                 href="/rps"
-                className="hover:text-[var(--accent-light)] transition-colors"
+                className="hover:text-[var(--accent)] transition-colors hover:neon-text-yellow"
               >
                 RPS
               </a>
               <a
                 href="/ttt"
-                className="hover:text-[var(--accent-light)] transition-colors"
+                className="hover:text-[var(--accent)] transition-colors"
               >
                 TTT
               </a>
               <a
                 href="/matches"
-                className="hover:text-[var(--accent-light)] transition-colors"
+                className="hover:text-[var(--accent)] transition-colors"
               >
                 Matches
               </a>
               <a
                 href="/leaderboard"
-                className="hover:text-[var(--accent-light)] transition-colors"
+                className="hover:text-[var(--accent)] transition-colors"
               >
                 Leaderboard
               </a>
               <a
                 href="/skill.md"
-                className="hover:text-[var(--accent-light)] transition-colors"
+                className="hover:text-[var(--accent)] transition-colors"
               >
                 API Docs
               </a>

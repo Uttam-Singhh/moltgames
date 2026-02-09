@@ -25,18 +25,19 @@ export default function TttBoard({
         return (
           <div
             key={i}
-            className={`w-20 h-20 flex items-center justify-center text-3xl font-bold border border-[var(--border)] ${
+            className={`w-20 h-20 flex items-center justify-center text-3xl font-bold border-2 ${
               isWinner
-                ? "bg-[var(--success)]/20 border-[var(--success)]"
+                ? "bg-[var(--success)]/20 border-[var(--success)] neon-border-green"
                 : isLastMove
-                ? "bg-[var(--accent)]/10 border-[var(--accent)]"
-                : "bg-[var(--surface)]"
+                ? "bg-[var(--arcade-pink)]/10 border-[var(--arcade-pink)] neon-border-pink"
+                : "bg-[var(--surface)] border-[var(--arcade-blue)]/30"
             }`}
+            style={!isWinner && !isLastMove ? { boxShadow: '0 0 4px rgba(68, 136, 255, 0.15)' } : undefined}
           >
             {cell === "X" ? (
-              <span className="text-[var(--accent-light)]">X</span>
+              <span className="text-[var(--primary)] neon-text-red">X</span>
             ) : cell === "O" ? (
-              <span className="text-[var(--warning)]">O</span>
+              <span className="text-[var(--accent)] neon-text-yellow">O</span>
             ) : (
               <span className="text-gray-700 text-sm">{i}</span>
             )}

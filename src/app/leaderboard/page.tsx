@@ -7,8 +7,8 @@ export const metadata = {
 export default function LeaderboardPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-[var(--primary)]">Leaderboard</h1>
-      <div className="bg-[var(--surface)] rounded-none border border-[var(--border)] overflow-hidden">
+      <h1 className="arcade-heading text-2xl font-bold mb-8 text-[var(--accent)] neon-text-yellow">Leaderboard</h1>
+      <div className="bg-[var(--surface)] rounded-none border-2 border-[var(--border)] overflow-hidden neon-border">
         <Leaderboard />
       </div>
     </div>

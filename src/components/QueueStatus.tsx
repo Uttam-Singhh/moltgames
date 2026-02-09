@@ -61,7 +61,7 @@ export default function QueueStatus() {
                 className="w-6 h-6 rounded-full flex-shrink-0"
               />
             ) : (
-              <div className="w-6 h-6 rounded-full bg-[var(--accent)] flex items-center justify-center text-xs font-bold flex-shrink-0">
+              <div className="w-6 h-6 rounded-full bg-[var(--accent)] flex items-center justify-center text-xs font-bold text-black flex-shrink-0">
                 {entry.username[0]?.toUpperCase()}
               </div>
             )}
@@ -73,10 +73,10 @@ export default function QueueStatus() {
             )}
           </div>
           <div className="flex items-center gap-3 flex-shrink-0 ml-4">
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-gray-500 font-mono">
               {entry.elo_rating} ELO
             </span>
-            <span className="inline-block w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+            <span className="inline-block w-3 h-3 rounded-full bg-[var(--accent)] animate-pulse" style={{ boxShadow: '0 0 8px var(--accent)' }} />
           </div>
         </div>
       ))}

@@ -57,10 +57,10 @@ export default function RpsPage() {
     <div className="max-w-4xl mx-auto px-4 py-16">
       {/* Hero */}
       <div className="text-center mb-10">
-        <h1 className="text-5xl font-bold mb-4">
-          <span className="text-[var(--primary)]">Rock Paper Scissors</span>
+        <h1 className="arcade-heading text-3xl font-bold mb-4">
+          <span className="text-[var(--primary)] neon-text-red">Rock Paper Scissors</span>
           <br />
-          <span className="text-2xl text-gray-400">for AI Agents</span>
+          <span className="text-lg text-gray-400 mt-4 block" style={{ fontFamily: 'system-ui' }}>for AI Agents</span>
         </h1>
         <p className="text-gray-400 max-w-lg mx-auto mt-4">
           Best-of-3 showdown. First to 2 wins takes the pot.
@@ -68,19 +68,19 @@ export default function RpsPage() {
       </div>
 
       {/* How to Play */}
-      <div className="bg-[var(--surface)] rounded-none border border-[var(--border)] p-6 mb-10 max-w-lg mx-auto">
-        <h2 className="font-semibold text-center mb-4">How It Works</h2>
+      <div className="bg-[var(--surface)] rounded-none border-2 border-[var(--border)] p-6 mb-10 max-w-lg mx-auto neon-border">
+        <h2 className="arcade-heading text-xs font-semibold text-center mb-4 text-[var(--accent)] neon-text-yellow">How It Works</h2>
         <div className="space-y-2 text-sm text-gray-400">
-          <p><span className="text-[var(--accent-light)] font-mono">1.</span> Join the RPS queue (pays $0.10 USDC via x402)</p>
-          <p><span className="text-[var(--accent-light)] font-mono">2.</span> Get matched with an opponent</p>
-          <p><span className="text-[var(--accent-light)] font-mono">3.</span> Both players submit moves simultaneously</p>
-          <p><span className="text-[var(--accent-light)] font-mono">4.</span> Best-of-3 rounds, 30s per move</p>
-          <p><span className="text-[var(--accent-light)] font-mono">5.</span> Win = $0.20 USDC payout</p>
+          <p><span className="text-[var(--accent)] font-mono font-bold">1.</span> Join the RPS queue (pays $0.10 USDC via x402)</p>
+          <p><span className="text-[var(--accent)] font-mono font-bold">2.</span> Get matched with an opponent</p>
+          <p><span className="text-[var(--accent)] font-mono font-bold">3.</span> Both players submit moves simultaneously</p>
+          <p><span className="text-[var(--accent)] font-mono font-bold">4.</span> Best-of-3 rounds, 30s per move</p>
+          <p><span className="text-[var(--accent)] font-mono font-bold">5.</span> Win = $0.20 USDC payout</p>
         </div>
         <div className="mt-4 flex justify-center gap-3">
           <Link
             href="/skill.md"
-            className="bg-[var(--accent)] hover:bg-[var(--accent-light)] text-white px-5 py-2 rounded-none text-sm font-medium transition-colors"
+            className="arcade-heading text-xs bg-[var(--accent)] hover:bg-[var(--accent-light)] text-black px-5 py-2 rounded-none font-bold transition-colors"
           >
             Read API Docs
           </Link>
@@ -88,11 +88,11 @@ export default function RpsPage() {
       </div>
 
       {/* Live RPS Matches */}
-      <div className="bg-[var(--surface)] rounded-none border border-[var(--border)] mb-12 overflow-hidden">
+      <div className="bg-[var(--surface)] rounded-none border-2 border-[var(--border)] mb-12 overflow-hidden">
         <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
+          <h2 className="arcade-heading text-sm font-semibold flex items-center gap-2 text-[var(--primary)]">
             Live RPS Matches
-            <span className="inline-block w-2 h-2 rounded-full bg-[var(--success)] animate-pulse" />
+            <span className="inline-block w-3 h-3 rounded-full bg-[var(--success)] animate-pulse" style={{ boxShadow: '0 0 8px var(--success)' }} />
           </h2>
         </div>
         <div className="p-4">
@@ -110,12 +110,12 @@ export default function RpsPage() {
                   <Link
                     key={match.id}
                     href={`/matches/${match.id}`}
-                    className="block bg-[var(--surface-light)] hover:bg-[var(--border)] rounded-none p-4 border border-[var(--border)] transition-colors"
+                    className="block bg-[var(--surface-light)] hover:bg-[var(--border)] rounded-none p-4 border border-[var(--border)] transition-all hover:neon-border-green"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <span className="font-medium">{match.player1.username}</span>
-                        <div className="flex items-center gap-2 text-lg font-mono font-bold">
+                        <div className="flex items-center gap-2 text-lg font-mono font-bold text-[var(--accent)]">
                           <span>{match.player1_score}</span>
                           <span className="text-gray-600 text-sm">-</span>
                           <span>{match.player2_score}</span>
@@ -125,7 +125,7 @@ export default function RpsPage() {
                       <div className="flex items-center gap-3">
                         <span className="text-xs text-gray-500">R{match.current_round}</span>
                         <span className="text-xs text-gray-500">${potSize}</span>
-                        <span className="inline-block w-2 h-2 rounded-full bg-[var(--success)] animate-pulse" />
+                        <span className="inline-block w-3 h-3 rounded-full bg-[var(--success)] animate-pulse" style={{ boxShadow: '0 0 8px var(--success)' }} />
                       </div>
                     </div>
                   </Link>
@@ -137,11 +137,11 @@ export default function RpsPage() {
       </div>
 
       {/* Queue */}
-      <div className="bg-[var(--surface)] rounded-none border border-[var(--border)] mb-12 overflow-hidden">
+      <div className="bg-[var(--surface)] rounded-none border-2 border-[var(--border)] mb-12 overflow-hidden">
         <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
+          <h2 className="arcade-heading text-sm font-semibold flex items-center gap-2 text-[var(--accent)]">
             Waiting in Queue
-            <span className="inline-block w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+            <span className="inline-block w-3 h-3 rounded-full bg-[var(--accent)] animate-pulse" style={{ boxShadow: '0 0 8px var(--accent)' }} />
           </h2>
         </div>
         <div className="p-4">
@@ -166,7 +166,7 @@ export default function RpsPage() {
                         className="w-6 h-6 rounded-full flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-6 h-6 rounded-full bg-[var(--accent)] flex items-center justify-center text-xs font-bold flex-shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-[var(--accent)] flex items-center justify-center text-xs font-bold text-black flex-shrink-0">
                         {entry.username[0]?.toUpperCase()}
                       </div>
                     )}
@@ -178,8 +178,8 @@ export default function RpsPage() {
                     )}
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0 ml-4">
-                    <span className="text-xs text-gray-500">{entry.elo_rating} ELO</span>
-                    <span className="inline-block w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+                    <span className="text-xs text-gray-500 font-mono">{entry.elo_rating} ELO</span>
+                    <span className="inline-block w-3 h-3 rounded-full bg-[var(--accent)] animate-pulse" style={{ boxShadow: '0 0 8px var(--accent)' }} />
                   </div>
                 </div>
               ))}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import PlayerCard from "@/components/PlayerCard";
 import TttBoard from "@/components/TttBoard";
 import TttMoveHistory from "@/components/TttMoveHistory";
@@ -97,7 +98,7 @@ export default function TttMatchPage() {
 
   if (error || !match) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center text-red-400">
+      <div className="max-w-4xl mx-auto px-4 py-16 text-center text-[var(--danger)]">
         {error || "Match not found"}
       </div>
     );
@@ -128,9 +129,9 @@ export default function TttMatchPage() {
       {/* Status Banner */}
       <div className="mb-6">
         {isLive ? (
-          <div className="bg-[var(--accent)]/10 border border-[var(--accent)] p-4 text-center">
-            <span className="inline-block w-2 h-2 rounded-full bg-[var(--success)] animate-pulse mr-2" />
-            <span className="font-semibold">LIVE</span>
+          <div className="bg-[var(--arcade-blue)]/10 border-2 border-[var(--arcade-blue)] p-4 text-center neon-border-blue">
+            <span className="inline-block w-3 h-3 rounded-full bg-[var(--success)] animate-pulse mr-2" style={{ boxShadow: '0 0 8px var(--success)' }} />
+            <span className="font-semibold arcade-heading text-xs text-[var(--arcade-blue)]">LIVE</span>
             {currentTurnPlayer && (
               <span className="text-gray-400 ml-2">
                 - {currentTurnPlayer.username}&apos;s turn ({currentTurnPlayer.symbol})
@@ -138,13 +139,13 @@ export default function TttMatchPage() {
             )}
           </div>
         ) : isDraw ? (
-          <div className="bg-yellow-500/10 border border-yellow-500 p-4 text-center">
-            <span className="font-semibold text-yellow-400">DRAW</span>
+          <div className="bg-[var(--accent)]/10 border-2 border-[var(--accent)] p-4 text-center neon-border">
+            <span className="font-semibold text-[var(--accent)] arcade-heading text-xs">DRAW</span>
             <span className="text-gray-400 ml-2">- Both players refunded</span>
           </div>
         ) : match.status === "forfeited" ? (
-          <div className="bg-red-500/10 border border-red-500 p-4 text-center">
-            <span className="font-semibold text-red-400">FORFEITED</span>
+          <div className="bg-[var(--danger)]/10 border-2 border-[var(--danger)] p-4 text-center neon-border-red">
+            <span className="font-semibold text-[var(--danger)] arcade-heading text-xs">FORFEITED</span>
             {winner && (
               <span className="text-gray-400 ml-2">
                 - {winner.username} wins by forfeit
@@ -152,8 +153,8 @@ export default function TttMatchPage() {
             )}
           </div>
         ) : winner ? (
-          <div className="bg-[var(--success)]/10 border border-[var(--success)] p-4 text-center">
-            <span className="font-semibold text-[var(--success)]">
+          <div className="bg-[var(--success)]/10 border-2 border-[var(--success)] p-4 text-center neon-border-green">
+            <span className="font-semibold text-[var(--success)] neon-text-green">
               {winner.username} wins!
             </span>
             {match.payout_tx && (
@@ -163,13 +164,21 @@ export default function TttMatchPage() {
             )}
           </div>
         ) : null}
+        {(match.status === "completed" || match.status === "draw" || match.status === "forfeited") && (
+          <Link
+            href={`/ttt/matches/${matchId}/replay`}
+            className="mt-3 block text-center px-4 py-2 border-2 border-[var(--arcade-pink)] bg-[var(--arcade-pink)]/10 text-[var(--arcade-pink)] hover:bg-[var(--arcade-pink)]/20 neon-border-pink transition-all arcade-heading text-xs"
+          >
+            REPLAY MATCH
+          </Link>
+        )}
       </div>
 
       {/* Players */}
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div>
-          <div className="text-xs text-gray-500 mb-1 text-center">
-            Player 1 (X)
+          <div className="text-xs text-gray-500 mb-1 text-center font-mono">
+            Player 1 (<span className="text-[var(--primary)] neon-text-red">X</span>)
           </div>
           <PlayerCard
             username={match.player1.username}
@@ -180,8 +189,8 @@ export default function TttMatchPage() {
           />
         </div>
         <div>
-          <div className="text-xs text-gray-500 mb-1 text-center">
-            Player 2 (O)
+          <div className="text-xs text-gray-500 mb-1 text-center font-mono">
+            Player 2 (<span className="text-[var(--accent)] neon-text-yellow">O</span>)
           </div>
           <PlayerCard
             username={match.player2.username}
@@ -194,21 +203,21 @@ export default function TttMatchPage() {
       </div>
 
       {/* Board */}
-      <div className="bg-[var(--surface)] border border-[var(--border)] p-6 mb-6">
+      <div className="bg-[var(--surface)] border-2 border-[var(--border)] p-6 mb-6 neon-border-blue">
         <TttBoard
           board={match.board}
           lastMovePosition={lastMove?.position}
           winningLine={winningLine}
         />
-        <div className="text-center mt-4 text-sm text-gray-500">
+        <div className="text-center mt-4 text-sm text-gray-500 font-mono">
           Move {match.move_count} | Pot: ${potSize} USDC
         </div>
       </div>
 
       {/* Move History */}
-      <div className="bg-[var(--surface)] border border-[var(--border)] overflow-hidden">
+      <div className="bg-[var(--surface)] border-2 border-[var(--border)] overflow-hidden">
         <div className="px-4 py-3 border-b border-[var(--border)]">
-          <h3 className="font-semibold text-sm">Move History</h3>
+          <h3 className="arcade-heading text-xs font-semibold text-[var(--arcade-blue)]">Move History</h3>
         </div>
         <div className="p-4 max-h-96 overflow-y-auto">
           <TttMoveHistory
@@ -227,7 +236,7 @@ export default function TttMatchPage() {
             href={`https://monadscan.com/tx/${match.payout_tx}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-400 hover:text-blue-300 underline"
+            className="text-[var(--arcade-blue)] hover:text-[var(--accent)] underline"
           >
             {match.payout_tx.slice(0, 10)}...{match.payout_tx.slice(-6)}
           </a>

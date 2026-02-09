@@ -2,96 +2,10 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import PlayerCard from "@/components/PlayerCard";
+import MoveClash from "@/components/MoveClash";
 import MatchHistory from "@/components/MatchHistory";
-
-const MOVE_EMOJIS: Record<string, string> = {
-  rock: "✊",
-  paper: "✋",
-  scissors: "✂️",
-};
-
-function getLocalWinner(
-  p1Move: string | null,
-  p2Move: string | null
-): "p1" | "p2" | "tie" | null {
-  if (!p1Move || !p2Move) return null;
-  if (p1Move === p2Move) return "tie";
-  if (
-    (p1Move === "rock" && p2Move === "scissors") ||
-    (p1Move === "scissors" && p2Move === "paper") ||
-    (p1Move === "paper" && p2Move === "rock")
-  ) {
-    return "p1";
-  }
-  return "p2";
-}
-
-function MoveClash({
-  p1Move,
-  p2Move,
-  p1Name,
-  p2Name,
-}: {
-  p1Move: string | null;
-  p2Move: string | null;
-  p1Name: string;
-  p2Name: string;
-}) {
-  const winner = getLocalWinner(p1Move, p2Move);
-  const p1Emoji = p1Move ? MOVE_EMOJIS[p1Move] : "❓";
-  const p2Emoji = p2Move ? MOVE_EMOJIS[p2Move] : "❓";
-
-  return (
-    <div className="flex flex-col items-center mb-6">
-      <div className="flex items-center justify-center gap-0">
-        {/* Player 1 Move */}
-        <div
-          className={`text-7xl transition-all duration-300 transform -rotate-12 ${
-            winner === "p1"
-              ? "bg-green-500/30 rounded-full p-4 scale-110"
-              : winner === "p2"
-              ? "opacity-50 scale-90"
-              : "p-4"
-          }`}
-          style={{ marginRight: "-20px", zIndex: winner === "p1" ? 10 : 1 }}
-        >
-          {p1Emoji}
-        </div>
-
-        {/* Clash effect */}
-        <div className="text-4xl animate-pulse z-20">💥</div>
-
-        {/* Player 2 Move */}
-        <div
-          className={`text-7xl transition-all duration-300 transform rotate-12 ${
-            winner === "p2"
-              ? "bg-green-500/30 rounded-full p-4 scale-110"
-              : winner === "p1"
-              ? "opacity-50 scale-90"
-              : "p-4"
-          }`}
-          style={{ marginLeft: "-20px", zIndex: winner === "p2" ? 10 : 1 }}
-        >
-          {p2Emoji}
-        </div>
-      </div>
-
-      {/* Result text */}
-      <div className="mt-2 text-sm text-gray-400">
-        {winner === "tie" && "Tie!"}
-        {winner === "p1" && (
-          <span className="text-green-400">{p1Name} wins the round!</span>
-        )}
-        {winner === "p2" && (
-          <span className="text-green-400">{p2Name} wins the round!</span>
-        )}
-        {!winner && p1Move && p2Move === null && "Waiting for opponent..."}
-        {!winner && !p1Move && !p2Move && "Waiting for moves..."}
-      </div>
-    </div>
-  );
-}
 
 interface MatchData {
   id: string;
@@ -147,7 +61,7 @@ export default function MatchViewerPage() {
   if (error) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="bg-red-500/10 border border-red-500 rounded-none p-6 text-center">
+        <div className="bg-[var(--danger)]/10 border-2 border-[var(--danger)] rounded-none p-6 text-center neon-border-red">
           {error}
         </div>
       </div>
@@ -180,8 +94,8 @@ export default function MatchViewerPage() {
       {/* Status Banner */}
       <div className="mb-6">
         {match.status === "in_progress" && (
-          <div className="bg-[var(--accent)]/20 border border-[var(--accent)] rounded-none p-3 text-center">
-            <span className="text-[var(--accent-light)] font-semibold">
+          <div className="bg-[var(--primary)]/20 border-2 border-[var(--primary)] rounded-none p-3 text-center neon-border-red">
+            <span className="text-[var(--primary)] font-semibold arcade-heading text-xs">
               {match.sudden_death
                 ? "SUDDEN DEATH"
                 : `Round ${match.current_round}`}
@@ -190,8 +104,8 @@ export default function MatchViewerPage() {
           </div>
         )}
         {match.status === "completed" && (
-          <div className="bg-green-500/20 border border-green-500 rounded-none p-3 text-center">
-            <span className="font-semibold">Match Complete</span>
+          <div className="bg-[var(--success)]/20 border-2 border-[var(--success)] rounded-none p-3 text-center neon-border-green">
+            <span className="font-semibold text-[var(--success)]">Match Complete</span>
             {match.payout_tx && (
               <span className="text-gray-400 ml-2 text-sm">
                 Payout: {match.payout_tx.slice(0, 10)}...
@@ -200,9 +114,17 @@ export default function MatchViewerPage() {
           </div>
         )}
         {match.status === "forfeited" && (
-          <div className="bg-red-500/20 border border-red-500 rounded-none p-3 text-center">
-            <span className="font-semibold">Match Forfeited (Timeout)</span>
+          <div className="bg-[var(--danger)]/20 border-2 border-[var(--danger)] rounded-none p-3 text-center neon-border-red">
+            <span className="font-semibold text-[var(--danger)]">Match Forfeited (Timeout)</span>
           </div>
+        )}
+        {(match.status === "completed" || match.status === "forfeited") && (
+          <Link
+            href={`/matches/${matchId}/replay`}
+            className="mt-3 block text-center px-4 py-2 border-2 border-[var(--arcade-pink)] bg-[var(--arcade-pink)]/10 text-[var(--arcade-pink)] hover:bg-[var(--arcade-pink)]/20 neon-border-pink transition-all arcade-heading text-xs"
+          >
+            REPLAY MATCH
+          </Link>
         )}
       </div>
 
@@ -213,6 +135,7 @@ export default function MatchViewerPage() {
           p2Move={clashRound.player2_move}
           p1Name={match.player1.username}
           p2Name={match.player2.username}
+          roundKey={clashRound.round_number}
         />
       )}
 
@@ -227,7 +150,7 @@ export default function MatchViewerPage() {
           eloChange={match.player1_elo_change}
         />
         <div className="text-center">
-          <div className="text-2xl font-bold text-gray-500">VS</div>
+          <div className="arcade-heading text-2xl font-bold text-[var(--accent)] neon-text-yellow">VS</div>
           <div className="text-xs text-gray-500 mt-1">
             Pot: ${potSize}
           </div>
@@ -243,10 +166,10 @@ export default function MatchViewerPage() {
       </div>
 
       {/* Round History */}
-      <div className="bg-[var(--surface)] rounded-none border border-[var(--border)] overflow-hidden">
+      <div className="bg-[var(--surface)] rounded-none border-2 border-[var(--border)] overflow-hidden">
         <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
-          <h2 className="font-semibold">Round History</h2>
-          <span className="text-sm text-gray-400">
+          <h2 className="arcade-heading text-xs font-semibold text-[var(--accent)]">Round History</h2>
+          <span className="text-sm text-gray-400 font-mono">
             {match.rounds.filter((r) => r.resolved_at).length} rounds played
           </span>
         </div>

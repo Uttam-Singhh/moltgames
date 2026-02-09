@@ -11,13 +11,18 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
+export const gameTypeEnum = pgEnum("game_type", ["rps", "ttt"]);
+
 export const matchStatusEnum = pgEnum("match_status", [
   "in_progress",
   "completed",
   "forfeited",
+  "draw",
 ]);
 
 export const moveEnum = pgEnum("move", ["rock", "paper", "scissors"]);
+
+export const tttSymbolEnum = pgEnum("ttt_symbol", ["X", "O"]);
 
 export const players = pgTable("players", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -44,6 +49,7 @@ export const players = pgTable("players", {
 
 export const matches = pgTable("matches", {
   id: uuid("id").defaultRandom().primaryKey(),
+  gameType: gameTypeEnum("game_type").default("rps").notNull(),
   player1Id: uuid("player1_id")
     .references(() => players.id)
     .notNull(),
@@ -110,3 +116,58 @@ export const challenges = pgTable("challenges", {
     .defaultNow()
     .notNull(),
 });
+
+// ── TTT Tables ───────────────────────────────────────────────────────────
+
+export const tttGames = pgTable(
+  "ttt_games",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    matchId: uuid("match_id")
+      .references(() => matches.id)
+      .notNull(),
+    board: varchar("board", { length: 9 }).default("---------").notNull(),
+    currentTurn: uuid("current_turn")
+      .references(() => players.id)
+      .notNull(),
+    moveCount: integer("move_count").default(0).notNull(),
+    lastMoveAt: timestamp("last_move_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [uniqueIndex("ttt_games_match_id_idx").on(table.matchId)]
+);
+
+export const tttMoves = pgTable("ttt_moves", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  matchId: uuid("match_id")
+    .references(() => matches.id)
+    .notNull(),
+  playerId: uuid("player_id")
+    .references(() => players.id)
+    .notNull(),
+  position: integer("position").notNull(),
+  symbol: tttSymbolEnum("symbol").notNull(),
+  moveNumber: integer("move_number").notNull(),
+  reasoning: varchar("reasoning", { length: 500 }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const tttQueue = pgTable(
+  "ttt_queue",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    playerId: uuid("player_id")
+      .references(() => players.id)
+      .notNull(),
+    walletAddress: text("wallet_address"),
+    paymentReceipt: text("payment_receipt"),
+    eloRating: integer("elo_rating").default(1000).notNull(),
+    joinedAt: timestamp("joined_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [uniqueIndex("ttt_queue_player_id_idx").on(table.playerId)]
+);

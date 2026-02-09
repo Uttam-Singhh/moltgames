@@ -5,6 +5,7 @@ import Link from "next/link";
 
 interface MatchSummary {
   id: string;
+  game_type?: string;
   player1: { id: string; username: string; avatar_url: string | null };
   player2: { id: string; username: string; avatar_url: string | null };
   player1_score: number;
@@ -16,18 +17,26 @@ interface MatchSummary {
   player2_payment_receipt?: string | null;
   payout_tx?: string | null;
   current_round?: number;
+  move_count?: number;
   created_at: string;
   completed_at: string | null;
 }
 
 function MatchCard({ match }: { match: MatchSummary }) {
   const isLive = match.status === "in_progress";
+  const isDraw = match.status === "draw";
   const winner =
     match.winner_id === match.player1.id
       ? match.player1
       : match.winner_id === match.player2.id
       ? match.player2
       : null;
+
+  const gameType = match.game_type?.toUpperCase() ?? "RPS";
+  const matchUrl =
+    match.game_type === "ttt"
+      ? `/ttt/matches/${match.id}`
+      : `/matches/${match.id}`;
 
   // Parse payment receipts to extract transaction hashes
   const getTransactionHash = (receipt: string | null | undefined): string | null => {
@@ -45,25 +54,40 @@ function MatchCard({ match }: { match: MatchSummary }) {
 
   return (
     <Link
-      href={`/matches/${match.id}`}
+      href={matchUrl}
       className="block bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent)] transition-colors"
     >
       <div className="p-4">
-        {/* Status badge */}
+        {/* Status badge + game type */}
         <div className="flex items-center justify-between mb-3">
-          {isLive ? (
-            <span className="text-xs px-2 py-1 bg-[var(--accent)]/20 text-[var(--accent-light)] border border-[var(--accent)]">
-              LIVE - Round {match.current_round}
+          <div className="flex items-center gap-2">
+            <span
+              className={`text-xs px-2 py-0.5 font-bold border ${
+                gameType === "TTT"
+                  ? "bg-purple-500/20 text-purple-400 border-purple-500"
+                  : "bg-blue-500/20 text-blue-400 border-blue-500"
+              }`}
+            >
+              {gameType}
             </span>
-          ) : match.status === "forfeited" ? (
-            <span className="text-xs px-2 py-1 bg-red-500/20 text-red-400 border border-red-500">
-              FORFEITED
-            </span>
-          ) : (
-            <span className="text-xs px-2 py-1 bg-gray-500/20 text-gray-400 border border-gray-500">
-              COMPLETED
-            </span>
-          )}
+            {isLive ? (
+              <span className="text-xs px-2 py-1 bg-[var(--accent)]/20 text-[var(--accent-light)] border border-[var(--accent)]">
+                LIVE {match.current_round ? `- Round ${match.current_round}` : match.move_count != null ? `- Move ${match.move_count}` : ""}
+              </span>
+            ) : isDraw ? (
+              <span className="text-xs px-2 py-1 bg-yellow-500/20 text-yellow-400 border border-yellow-500">
+                DRAW
+              </span>
+            ) : match.status === "forfeited" ? (
+              <span className="text-xs px-2 py-1 bg-red-500/20 text-red-400 border border-red-500">
+                FORFEITED
+              </span>
+            ) : (
+              <span className="text-xs px-2 py-1 bg-gray-500/20 text-gray-400 border border-gray-500">
+                COMPLETED
+              </span>
+            )}
+          </div>
           <span className="text-xs text-gray-500">
             {new Date(match.created_at).toLocaleDateString()}
           </span>
@@ -124,7 +148,6 @@ function MatchCard({ match }: { match: MatchSummary }) {
         {(player1StakeTx || player2StakeTx || match.payout_tx) && (
           <div className="mt-3 pt-3 border-t border-[var(--border)]">
             <div className="grid grid-cols-2 gap-2 text-xs">
-              {/* Payment Receipts */}
               {player1StakeTx && (
                 <div>
                   <span className="text-gray-500">
@@ -160,7 +183,6 @@ function MatchCard({ match }: { match: MatchSummary }) {
                 </div>
               )}
 
-              {/* Payout Transaction */}
               {match.payout_tx && winner && (
                 <div className="col-span-2">
                   <span className="text-gray-500">Payout to {winner.username}:</span>{" "}
@@ -193,17 +215,38 @@ export default function MatchesPage() {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    // Fetch live matches
-    fetch("/api/v1/matches/live")
-      .then((r) => r.json())
-      .then((data) => setLiveMatches(data.matches || []))
+    // Fetch live matches from both games
+    Promise.all([
+      fetch("/api/v1/matches/live").then((r) => r.json()),
+      fetch("/api/v1/ttt/live").then((r) => r.json()),
+    ])
+      .then(([rpsData, tttData]) => {
+        const all = [
+          ...(rpsData.matches || []),
+          ...(tttData.matches || []),
+        ].sort(
+          (a: MatchSummary, b: MatchSummary) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+        setLiveMatches(all);
+      })
       .catch(console.error);
 
-    // Fetch past matches
-    fetch(`/api/v1/matches/history?page=${page}&limit=20`)
-      .then((r) => r.json())
-      .then((data) => {
-        setPastMatches(data.matches || []);
+    // Fetch past matches from both games
+    Promise.all([
+      fetch(`/api/v1/matches/history?page=${page}&limit=10`).then((r) => r.json()),
+      fetch(`/api/v1/ttt/history?page=${page}&limit=10`).then((r) => r.json()),
+    ])
+      .then(([rpsData, tttData]) => {
+        const all = [
+          ...(rpsData.matches || []),
+          ...(tttData.matches || []),
+        ].sort(
+          (a: MatchSummary, b: MatchSummary) =>
+            new Date(b.completed_at || b.created_at).getTime() -
+            new Date(a.completed_at || a.created_at).getTime()
+        );
+        setPastMatches(all);
         setLoading(false);
       })
       .catch(console.error);
@@ -212,9 +255,21 @@ export default function MatchesPage() {
   // Poll live matches
   useEffect(() => {
     const interval = setInterval(() => {
-      fetch("/api/v1/matches/live")
-        .then((r) => r.json())
-        .then((data) => setLiveMatches(data.matches || []))
+      Promise.all([
+        fetch("/api/v1/matches/live").then((r) => r.json()),
+        fetch("/api/v1/ttt/live").then((r) => r.json()),
+      ])
+        .then(([rpsData, tttData]) => {
+          const all = [
+            ...(rpsData.matches || []),
+            ...(tttData.matches || []),
+          ].sort(
+            (a: MatchSummary, b: MatchSummary) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
+          );
+          setLiveMatches(all);
+        })
         .catch(console.error);
     }, 5000);
 
@@ -223,7 +278,7 @@ export default function MatchesPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6 text-[var(--primary)]">Matches</h1>
+      <h1 className="text-2xl font-bold mb-6 text-[var(--primary)]">All Matches</h1>
 
       {/* Live Matches */}
       {liveMatches.length > 0 && (

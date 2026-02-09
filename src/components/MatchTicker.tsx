@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 interface MatchResult {
   id: string;
+  game_type?: string;
   player1: { id: string; username: string };
   player2: { id: string; username: string };
   player1_score: number;
@@ -18,31 +19,41 @@ export default function MatchTicker() {
   const [liveMatches, setLiveMatches] = useState<MatchResult[]>([]);
 
   useEffect(() => {
-    // Fetch recent completed matches
-    fetch("/api/v1/matches/history?limit=15")
-      .then((r) => r.json())
-      .then((data) => setCompletedMatches(data.matches || []))
-      .catch(console.error);
-
-    // Fetch live matches
-    fetch("/api/v1/matches/live")
-      .then((r) => r.json())
-      .then((data) => setLiveMatches(data.matches || []))
-      .catch(console.error);
-
-    // Refresh every 5 seconds
-    const interval = setInterval(() => {
-      fetch("/api/v1/matches/history?limit=15")
-        .then((r) => r.json())
-        .then((data) => setCompletedMatches(data.matches || []))
+    const fetchAll = () => {
+      // Fetch completed matches from both games
+      Promise.all([
+        fetch("/api/v1/matches/history?limit=10").then((r) => r.json()),
+        fetch("/api/v1/ttt/history?limit=10").then((r) => r.json()),
+      ])
+        .then(([rpsData, tttData]) => {
+          const all = [
+            ...(rpsData.matches || []),
+            ...(tttData.matches || []),
+          ].sort(
+            (a: MatchResult, b: MatchResult) =>
+              new Date(b.completed_at || b.id).getTime() -
+              new Date(a.completed_at || a.id).getTime()
+          );
+          setCompletedMatches(all.slice(0, 15));
+        })
         .catch(console.error);
 
-      fetch("/api/v1/matches/live")
-        .then((r) => r.json())
-        .then((data) => setLiveMatches(data.matches || []))
+      // Fetch live matches from both games
+      Promise.all([
+        fetch("/api/v1/matches/live").then((r) => r.json()),
+        fetch("/api/v1/ttt/live").then((r) => r.json()),
+      ])
+        .then(([rpsData, tttData]) => {
+          setLiveMatches([
+            ...(rpsData.matches || []),
+            ...(tttData.matches || []),
+          ]);
+        })
         .catch(console.error);
-    }, 5000);
+    };
 
+    fetchAll();
+    const interval = setInterval(fetchAll, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -63,6 +74,7 @@ export default function MatchTicker() {
                 : match.winner_id === match.player2.id
                 ? match.player2
                 : null;
+            const gameLabel = (match.game_type ?? "rps").toUpperCase();
 
             return (
               <div
@@ -70,6 +82,7 @@ export default function MatchTicker() {
                 className="ticker-item"
               >
                 <div className="match-container">
+                  <span className="game-label">{gameLabel}</span>
                   {isLive && (
                     <span className="live-badge">LIVE</span>
                   )}
@@ -121,6 +134,16 @@ export default function MatchTicker() {
           border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 4px;
           font-size: 0.875rem;
+        }
+
+        .game-label {
+          color: #9ca3af;
+          font-size: 0.65rem;
+          font-weight: 700;
+          letter-spacing: 0.05em;
+          padding: 1px 5px;
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 3px;
         }
 
         .live-badge {

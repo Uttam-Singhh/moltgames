@@ -7,7 +7,11 @@ export const MatchStatusSchema = z.enum([
   "in_progress",
   "completed",
   "forfeited",
+  "draw",
 ]);
+
+export const GameTypeSchema = z.enum(["rps", "ttt"]);
+export type GameType = z.infer<typeof GameTypeSchema>;
 export type MatchStatus = z.infer<typeof MatchStatusSchema>;
 
 export const SubmitMoveSchema = z.object({
@@ -94,4 +98,31 @@ export interface RoundPublic {
   player2Reasoning: string | null;
   winnerId: string | null;
   resolvedAt: string | null;
+}
+
+// ── TTT Types ──────────────────────────────────────────────────────────
+
+export const SubmitTttMoveSchema = z.object({
+  position: z.number().int().min(0).max(8),
+  reasoning: z.string().max(500).optional(),
+});
+
+export type TttSymbol = "X" | "O";
+
+export interface TttGamePublic {
+  matchId: string;
+  board: string;
+  boardGrid: string[][];
+  currentTurn: string;
+  moveCount: number;
+  lastMoveAt: string;
+}
+
+export interface TttMovePublic {
+  position: number;
+  symbol: TttSymbol;
+  moveNumber: number;
+  playerId: string;
+  reasoning: string | null;
+  createdAt: string;
 }

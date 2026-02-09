@@ -14,3 +14,16 @@ export function calculateEloChange(
 
   return { winnerChange, loserChange };
 }
+
+export function calculateEloChangeDraw(
+  p1Elo: number,
+  p2Elo: number
+): { p1Change: number; p2Change: number } {
+  const expectedP1 = 1 / (1 + Math.pow(10, (p2Elo - p1Elo) / 400));
+  const expectedP2 = 1 / (1 + Math.pow(10, (p1Elo - p2Elo) / 400));
+
+  const p1Change = Math.round(ELO_K_FACTOR * (0.5 - expectedP1));
+  const p2Change = Math.round(ELO_K_FACTOR * (0.5 - expectedP2));
+
+  return { p1Change, p2Change };
+}

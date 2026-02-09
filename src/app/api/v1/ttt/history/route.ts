@@ -8,24 +8,29 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
-    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") ?? "20", 10)));
+    const limit = Math.min(
+      50,
+      Math.max(1, parseInt(searchParams.get("limit") ?? "20", 10))
+    );
     const offset = (page - 1) * limit;
 
-    // Get completed or forfeited RPS matches
     const pastMatches = await db
       .select()
       .from(matches)
       .where(
         and(
-          eq(matches.gameType, "rps"),
-          or(eq(matches.status, "completed"), eq(matches.status, "forfeited"))
+          eq(matches.gameType, "ttt"),
+          or(
+            eq(matches.status, "completed"),
+            eq(matches.status, "forfeited"),
+            eq(matches.status, "draw")
+          )
         )
       )
       .orderBy(desc(matches.completedAt))
       .limit(limit)
       .offset(offset);
 
-    // Get player info
     const playerIds = new Set<string>();
     for (const m of pastMatches) {
       playerIds.add(m.player1Id);
@@ -50,7 +55,7 @@ export async function GET(request: Request) {
 
     const formatted = pastMatches.map((m) => ({
       id: m.id,
-      game_type: "rps",
+      game_type: "ttt",
       player1: {
         id: m.player1Id,
         username: playerMap.get(m.player1Id)?.username ?? "Unknown",
@@ -61,13 +66,9 @@ export async function GET(request: Request) {
         username: playerMap.get(m.player2Id)?.username ?? "Unknown",
         avatar_url: playerMap.get(m.player2Id)?.avatarUrl ?? null,
       },
-      player1_score: m.player1Score,
-      player2_score: m.player2Score,
       winner_id: m.winnerId,
       status: m.status,
       entry_fee: m.entryFee,
-      player1_payment_receipt: m.player1PaymentReceipt,
-      player2_payment_receipt: m.player2PaymentReceipt,
       payout_tx: m.payoutTx,
       created_at: m.createdAt.toISOString(),
       completed_at: m.completedAt?.toISOString() ?? null,

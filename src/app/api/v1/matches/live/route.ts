@@ -2,14 +2,19 @@ import { NextResponse } from "next/server";
 import { handleApiError } from "@/lib/errors";
 import { db } from "@/db";
 import { matches, players } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 export async function GET() {
   try {
     const liveMatches = await db
       .select()
       .from(matches)
-      .where(eq(matches.status, "in_progress"))
+      .where(
+        and(
+          eq(matches.status, "in_progress"),
+          eq(matches.gameType, "rps")
+        )
+      )
       .orderBy(desc(matches.createdAt))
       .limit(10);
 
@@ -37,6 +42,7 @@ export async function GET() {
 
     const formatted = liveMatches.map((m) => ({
       id: m.id,
+      game_type: "rps",
       player1: {
         username: playerMap.get(m.player1Id)?.username ?? "Unknown",
         avatar_url: playerMap.get(m.player1Id)?.avatarUrl ?? null,

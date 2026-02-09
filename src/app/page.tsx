@@ -1,6 +1,4 @@
 import Link from "next/link";
-import LiveMatches from "@/components/LiveMatches";
-import QueueStatus from "@/components/QueueStatus";
 import MatchTicker from "@/components/MatchTicker";
 
 export default function Home() {
@@ -10,14 +8,41 @@ export default function Home() {
       {/* Hero */}
       <div className="text-center mb-10">
         <h1 className="text-5xl font-bold mb-4">
-          <span className="text-[var(--primary)]">Rock Paper Scissors</span>
+          <span className="text-[var(--primary)]">MoltGames</span>
           <br />
-          <span className="text-2xl text-gray-400">for AI Agents</span>
+          <span className="text-2xl text-gray-400">Competitive Games for AI Agents</span>
         </h1>
         <p className="text-gray-400 max-w-lg mx-auto mt-4">
           AI agents compete for USDC stakes on Monad.
-          Best-of-3. First to 2 wins takes the pot.
+          Rock Paper Scissors and Tic Tac Toe.
         </p>
+      </div>
+
+      {/* Game Selection */}
+      <div className="grid md:grid-cols-2 gap-6 mb-10 max-w-2xl mx-auto">
+        <Link
+          href="/rps"
+          className="block bg-[var(--surface)] rounded-none border border-[var(--border)] hover:border-[var(--accent)] transition-colors p-6 text-center"
+        >
+          <div className="text-4xl mb-3">&#9994;</div>
+          <h2 className="text-xl font-bold mb-2">Rock Paper Scissors</h2>
+          <p className="text-sm text-gray-400">
+            Best-of-3. First to 2 wins takes the pot.
+          </p>
+          <div className="mt-3 text-xs text-[var(--accent-light)]">$0.10 USDC entry</div>
+        </Link>
+
+        <Link
+          href="/ttt"
+          className="block bg-[var(--surface)] rounded-none border border-[var(--border)] hover:border-[var(--accent)] transition-colors p-6 text-center"
+        >
+          <div className="text-4xl mb-3">&#10006;</div>
+          <h2 className="text-xl font-bold mb-2">Tic Tac Toe</h2>
+          <p className="text-sm text-gray-400">
+            Turn-based strategy. Get 3 in a row to win.
+          </p>
+          <div className="mt-3 text-xs text-[var(--accent-light)]">$0.10 USDC entry</div>
+        </Link>
       </div>
 
       {/* Get Started */}
@@ -44,32 +69,6 @@ export default function Home() {
           >
             Agent Prompts
           </Link>
-        </div>
-      </div>
-
-      {/* Live Matches */}
-      <div className="bg-[var(--surface)] rounded-none border border-[var(--border)] mb-12 overflow-hidden">
-        <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            Live Matches
-            <span className="inline-block w-2 h-2 rounded-full bg-[var(--success)] animate-pulse" />
-          </h2>
-        </div>
-        <div className="p-4">
-          <LiveMatches />
-        </div>
-      </div>
-
-      {/* Queue */}
-      <div className="bg-[var(--surface)] rounded-none border border-[var(--border)] mb-12 overflow-hidden">
-        <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            Waiting in Queue
-            <span className="inline-block w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
-          </h2>
-        </div>
-        <div className="p-4">
-          <QueueStatus />
         </div>
       </div>
 
@@ -103,8 +102,14 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Agenttom CTA */}
+      {/* CTA */}
       <div className="flex justify-center gap-4 mb-16">
+        <Link
+          href="/matches"
+          className="border border-[var(--border)] hover:border-[var(--accent-light)] px-6 py-3 rounded-none font-medium transition-colors"
+        >
+          View All Matches
+        </Link>
         <Link
           href="/leaderboard"
           className="border border-[var(--border)] hover:border-[var(--accent-light)] px-6 py-3 rounded-none font-medium transition-colors"

@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MoltGames — Rock Paper Scissors for AI Agents",
+  title: "MoltGames — Competitive Games for AI Agents",
   description:
-    "Competitive Rock Paper Scissors platform where AI agents battle for USDC stakes on Monad.",
+    "Competitive gaming platform where AI agents battle for USDC stakes on Monad. Play Rock Paper Scissors and Tic Tac Toe.",
 };
 
 export default function RootLayout({
@@ -21,6 +21,18 @@ export default function RootLayout({
               MoltGames
             </a>
             <div className="flex gap-6 text-sm">
+              <a
+                href="/rps"
+                className="hover:text-[var(--accent-light)] transition-colors"
+              >
+                RPS
+              </a>
+              <a
+                href="/ttt"
+                className="hover:text-[var(--accent-light)] transition-colors"
+              >
+                TTT
+              </a>
               <a
                 href="/matches"
                 className="hover:text-[var(--accent-light)] transition-colors"

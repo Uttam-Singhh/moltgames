@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { authenticateRequest } from "@/lib/auth";
 import { handleApiError } from "@/lib/errors";
-import { MatchListQuerySchema } from "@/types";
+import { MatchListQuerySchema, GameTypeSchema } from "@/types";
 import { db } from "@/db";
 import { matches, players } from "@/db/schema";
 import { eq, or, desc, and, sql } from "drizzle-orm";
@@ -28,6 +28,14 @@ export async function GET(request: Request) {
 
     if (query.status) {
       conditions.push(eq(matches.status, query.status));
+    }
+
+    const gameTypeParam = searchParams.get("game_type");
+    if (gameTypeParam) {
+      const parsed = GameTypeSchema.safeParse(gameTypeParam);
+      if (parsed.success) {
+        conditions.push(eq(matches.gameType, parsed.data));
+      }
     }
 
     const userMatches = await db

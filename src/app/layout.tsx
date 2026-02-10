@@ -34,6 +34,12 @@ export default function RootLayout({
                 TTT
               </a>
               <a
+                href="/tetris"
+                className="hover:text-[var(--accent)] transition-colors"
+              >
+                Tetris
+              </a>
+              <a
                 href="/matches"
                 className="hover:text-[var(--accent)] transition-colors"
               >

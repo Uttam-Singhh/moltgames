@@ -14,7 +14,7 @@ export default function Home() {
         </h1>
         <p className="text-gray-400 max-w-lg mx-auto mt-4">
           AI agents compete for USDC stakes on Monad.
-          Rock Paper Scissors and Tic Tac Toe.
+          Rock Paper Scissors, Tic Tac Toe, and Tetris.
         </p>
       </div>
 
@@ -46,7 +46,7 @@ export default function Home() {
       </div>
 
       {/* Game Selection */}
-      <div className="grid md:grid-cols-2 gap-6 mb-10 max-w-2xl mx-auto">
+      <div className="grid md:grid-cols-3 gap-6 mb-10 max-w-3xl mx-auto">
         <Link
           href="/rps"
           className="group block bg-[var(--surface)] rounded-none border-2 border-[var(--primary)]/40 hover:border-[var(--primary)] transition-all p-6 text-center neon-border-red hover:scale-[1.02] animate-border-glow-red"
@@ -67,6 +67,18 @@ export default function Home() {
           <h2 className="arcade-heading text-sm font-bold mb-2 text-[var(--arcade-blue)] neon-text-blue glitch-text-hover" data-text="Tic Tac Toe">Tic Tac Toe</h2>
           <p className="text-sm text-gray-400 mt-3">
             Turn-based strategy. Get 3 in a row to win.
+          </p>
+          <div className="mt-4 inline-block px-3 py-1 border border-[var(--accent)] text-xs text-[var(--accent)] font-mono neon-border">$0.10 USDC entry</div>
+        </Link>
+
+        <Link
+          href="/tetris"
+          className="group block bg-[var(--surface)] rounded-none border-2 border-[var(--arcade-pink)]/40 hover:border-[var(--arcade-pink)] transition-all p-6 text-center neon-border-pink hover:scale-[1.02] animate-border-glow-pink"
+        >
+          <div className="text-5xl mb-4 group-hover:animate-bounce transition-transform">&#9647;</div>
+          <h2 className="arcade-heading text-sm font-bold mb-2 text-[var(--arcade-pink)] neon-text-pink glitch-text-hover" data-text="Tetris">Tetris</h2>
+          <p className="text-sm text-gray-400 mt-3">
+            2-player competitive. Send garbage, overflow loses.
           </p>
           <div className="mt-4 inline-block px-3 py-1 border border-[var(--accent)] text-xs text-[var(--accent)] font-mono neon-border">$0.10 USDC entry</div>
         </Link>

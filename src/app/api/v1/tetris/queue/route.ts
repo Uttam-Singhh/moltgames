@@ -3,28 +3,35 @@ import { authenticateRequest } from "@/lib/auth";
 import { handleApiError, ApiError } from "@/lib/errors";
 import { handleX402Payment, sendRefund } from "@/lib/x402";
 import {
-  addToQueue,
-  removeFromQueue,
-  getQueueEntry,
-  tryMatchPlayers,
-} from "@/lib/matchmaking";
+  addToTetrisQueue,
+  removeFromTetrisQueue,
+  getTetrisQueueEntry,
+  tryMatchTetrisPlayers,
+} from "@/lib/tetris-matchmaking";
+import { getQueueEntry } from "@/lib/matchmaking";
 import { getTttQueueEntry } from "@/lib/ttt-matchmaking";
-import { getTetrisQueueEntry } from "@/lib/tetris-matchmaking";
 import { db } from "@/db";
 import { players, matches } from "@/db/schema";
 import { eq, or, and } from "drizzle-orm";
 
 export async function POST(request: Request) {
-
-  console.log("[QUEUE] request", request);
-
   try {
     const user = await authenticateRequest(request);
 
-    // Check if player is already in queue
-    const existing = await getQueueEntry(user.id);
-    if (existing) {
-      throw new ApiError(409, "Already in queue", "ALREADY_IN_QUEUE");
+    // Check if player is already in Tetris queue
+    const existingTetris = await getTetrisQueueEntry(user.id);
+    if (existingTetris) {
+      throw new ApiError(409, "Already in Tetris queue", "ALREADY_IN_QUEUE");
+    }
+
+    // Check if player is in RPS queue
+    const existingRps = await getQueueEntry(user.id);
+    if (existingRps) {
+      throw new ApiError(
+        409,
+        "You are in the RPS queue. Leave it first.",
+        "IN_OTHER_QUEUE"
+      );
     }
 
     // Check if player is in TTT queue
@@ -33,16 +40,6 @@ export async function POST(request: Request) {
       throw new ApiError(
         409,
         "You are in the TTT queue. Leave it first.",
-        "IN_OTHER_QUEUE"
-      );
-    }
-
-    // Check if player is in Tetris queue
-    const existingTetris = await getTetrisQueueEntry(user.id);
-    if (existingTetris) {
-      throw new ApiError(
-        409,
-        "You are in the Tetris queue. Leave it first.",
         "IN_OTHER_QUEUE"
       );
     }
@@ -70,13 +67,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // Settle x402 payment via facilitator
+    // Settle x402 payment
     const payment = await handleX402Payment(request);
 
-    console.log("[X402] payment", payment);
-
     if (!payment.success) {
-      // Returns 402 with payment requirements — agent retries with payment
       return new NextResponse(JSON.stringify(payment.responseBody), {
         status: payment.status,
         headers: {
@@ -86,7 +80,7 @@ export async function POST(request: Request) {
       });
     }
 
-    // Payment verified — get player's current ELO
+    // Get player's current ELO
     const [player] = await db
       .select()
       .from(players)
@@ -97,7 +91,7 @@ export async function POST(request: Request) {
       throw new ApiError(404, "Player not found");
     }
 
-    // Update player's wallet address if not already set
+    // Update wallet address if needed
     let walletAddress = player.walletAddress;
     if (!walletAddress && payment.payerAddress) {
       walletAddress = payment.payerAddress;
@@ -108,12 +102,10 @@ export async function POST(request: Request) {
           updatedAt: new Date(),
         })
         .where(eq(players.id, user.id));
-
-      console.log(`[QUEUE] Updated wallet address for ${player.username}: ${payment.payerAddress}`);
     }
 
-    // Add to queue
-    await addToQueue(
+    // Add to Tetris queue
+    await addToTetrisQueue(
       user.id,
       walletAddress,
       payment.receipt ?? null,
@@ -121,7 +113,7 @@ export async function POST(request: Request) {
     );
 
     // Try to match immediately
-    const matchResult = await tryMatchPlayers();
+    const matchResult = await tryMatchTetrisPlayers();
 
     if (matchResult?.matched) {
       return NextResponse.json({
@@ -133,7 +125,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       status: "queued",
       position: 1,
-      message: "Waiting for opponent...",
+      message: "Waiting for Tetris opponent...",
     });
   } catch (error) {
     return handleApiError(error);
@@ -144,12 +136,11 @@ export async function DELETE(request: Request) {
   try {
     const user = await authenticateRequest(request);
 
-    const entry = await removeFromQueue(user.id);
+    const entry = await removeFromTetrisQueue(user.id);
     if (!entry) {
-      throw new ApiError(404, "Not in queue", "NOT_IN_QUEUE");
+      throw new ApiError(404, "Not in Tetris queue", "NOT_IN_QUEUE");
     }
 
-    // Send refund if they had a payment receipt and wallet
     if (entry.paymentReceipt && entry.walletAddress) {
       const refundTx = await sendRefund(entry.walletAddress);
       return NextResponse.json({

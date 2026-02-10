@@ -38,3 +38,70 @@ export const TTT_CONSTANTS = {
     [2, 4, 6], // diagonal top-right to bottom-left
   ],
 } as const;
+
+export const TETRIS_CONSTANTS = {
+  BOARD_WIDTH: 10,
+  BOARD_HEIGHT: 20,
+  BOARD_SIZE: 200, // 10 * 20
+
+  // Gravity (auto-drop interval)
+  BASE_GRAVITY_SECONDS: 30,
+  REDUCTION_PER_LEVEL: 2.5,
+  MIN_GRAVITY_SECONDS: 5,
+
+  // Level progression
+  LINES_PER_LEVEL: 10,
+
+  // Scoring per lines cleared
+  SCORING: { 1: 100, 2: 300, 3: 500, 4: 800 } as Record<number, number>,
+
+  // Garbage lines sent per lines cleared
+  GARBAGE: { 1: 0, 2: 1, 3: 2, 4: 4 } as Record<number, number>,
+
+  // SRS piece definitions: each piece has 4 rotation states
+  // Cells are [row, col] offsets from the piece origin
+  PIECES: {
+    I: [
+      [[0, 0], [0, 1], [0, 2], [0, 3]],
+      [[0, 0], [1, 0], [2, 0], [3, 0]],
+      [[0, 0], [0, 1], [0, 2], [0, 3]],
+      [[0, 0], [1, 0], [2, 0], [3, 0]],
+    ],
+    O: [
+      [[0, 0], [0, 1], [1, 0], [1, 1]],
+      [[0, 0], [0, 1], [1, 0], [1, 1]],
+      [[0, 0], [0, 1], [1, 0], [1, 1]],
+      [[0, 0], [0, 1], [1, 0], [1, 1]],
+    ],
+    T: [
+      [[0, 0], [0, 1], [0, 2], [1, 1]],
+      [[0, 0], [1, 0], [2, 0], [1, 1]],
+      [[1, 0], [1, 1], [1, 2], [0, 1]],
+      [[0, 0], [1, 0], [2, 0], [1, -1]],
+    ],
+    S: [
+      [[0, 1], [0, 2], [1, 0], [1, 1]],
+      [[0, 0], [1, 0], [1, 1], [2, 1]],
+      [[0, 1], [0, 2], [1, 0], [1, 1]],
+      [[0, 0], [1, 0], [1, 1], [2, 1]],
+    ],
+    Z: [
+      [[0, 0], [0, 1], [1, 1], [1, 2]],
+      [[0, 1], [1, 0], [1, 1], [2, 0]],
+      [[0, 0], [0, 1], [1, 1], [1, 2]],
+      [[0, 1], [1, 0], [1, 1], [2, 0]],
+    ],
+    J: [
+      [[0, 0], [1, 0], [1, 1], [1, 2]],
+      [[0, 0], [0, 1], [1, 0], [2, 0]],
+      [[0, 0], [0, 1], [0, 2], [1, 2]],
+      [[0, 0], [1, 0], [2, 0], [2, -1]],
+    ],
+    L: [
+      [[0, 2], [1, 0], [1, 1], [1, 2]],
+      [[0, 0], [1, 0], [2, 0], [2, 1]],
+      [[0, 0], [0, 1], [0, 2], [1, 0]],
+      [[0, 0], [0, 1], [1, 1], [2, 1]],
+    ],
+  } as Record<string, [number, number][][]>,
+} as const;

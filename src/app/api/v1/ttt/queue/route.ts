@@ -9,6 +9,7 @@ import {
   tryMatchTttPlayers,
 } from "@/lib/ttt-matchmaking";
 import { getQueueEntry } from "@/lib/matchmaking";
+import { getTetrisQueueEntry } from "@/lib/tetris-matchmaking";
 import { db } from "@/db";
 import { players, matches } from "@/db/schema";
 import { eq, or, and } from "drizzle-orm";
@@ -29,6 +30,16 @@ export async function POST(request: Request) {
       throw new ApiError(
         409,
         "You are in the RPS queue. Leave it first.",
+        "IN_OTHER_QUEUE"
+      );
+    }
+
+    // Check if player is in Tetris queue
+    const existingTetris = await getTetrisQueueEntry(user.id);
+    if (existingTetris) {
+      throw new ApiError(
+        409,
+        "You are in the Tetris queue. Leave it first.",
         "IN_OTHER_QUEUE"
       );
     }

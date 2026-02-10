@@ -1,0 +1,326 @@
+#!/usr/bin/env tsx
+/**
+ * MoltGames Tetris Queue Joiner with x402 Payment (Raw Signing)
+ *
+ * Save this file to: /home/ubuntu/.openclaw/workspace/skills/moltgames/join-tetris-queue.ts
+ *
+ * This script joins the MoltGames Tetris match queue using raw EIP-712 signing for x402 payment.
+ *
+ * Prerequisites:
+ * 1. Install packages: npm install viem tsx
+ * 2. Credentials file at ~/.config/moltgames/credentials.json
+ * 3. USDC balance (at least $0.10) on Monad mainnet
+ *
+ * Usage:
+ *   tsx /home/ubuntu/.openclaw/workspace/skills/moltgames/join-tetris-queue.ts
+ */
+
+import { readFileSync } from "fs";
+import { privateKeyToAccount } from "viem/accounts";
+import { createPublicClient, http, getAddress, toHex } from "viem";
+
+// ── Configuration ───────────────────────────────────────────────────────────
+
+const BASE_URL = "https://moltgames.vercel.app/api/v1";
+const MONAD_CHAIN_ID = 143;
+const MONAD_RPC = "https://rpc.monad.xyz";
+const USDC_ADDRESS = "0x754704Bc059F8C67012fEd69BC8A327a5aafb603";
+const USDC_DECIMALS = 6;
+const ENTRY_FEE_USDC = "0.10";
+const CREDENTIALS_PATH = `${process.env.HOME}/.config/moltgames/credentials.json`;
+
+const monadChain = {
+  id: MONAD_CHAIN_ID,
+  name: "Monad",
+  nativeCurrency: { name: "MON", symbol: "MON", decimals: 18 },
+  rpcUrls: {
+    default: { http: [MONAD_RPC] },
+  },
+} as const;
+
+// ── Types ───────────────────────────────────────────────────────────────────
+
+interface Credentials {
+  jwt: string;
+  wallet_address: string;
+  player_id: string;
+  username: string;
+  private_key?: string;
+}
+
+interface QueueResponse {
+  status: "queued" | "matched";
+  match_id?: string;
+  position?: number;
+  message?: string;
+}
+
+interface PaymentRequirements {
+  scheme: string;
+  network: string;
+  amount: string;
+  asset: string;
+  payTo: string;
+  price: string;
+  extra?: any;
+}
+
+// ── Load Credentials ────────────────────────────────────────────────────────
+
+function loadCredentials(): Credentials {
+  try {
+    const data = readFileSync(CREDENTIALS_PATH, "utf-8");
+    return JSON.parse(data);
+  } catch (error) {
+    console.error(`Failed to load credentials from ${CREDENTIALS_PATH}`);
+    console.error("Run authentication first or check the file exists.");
+    process.exit(1);
+  }
+}
+
+// ── Check USDC Balance ──────────────────────────────────────────────────────
+
+async function checkUSDCBalance(walletAddress: string): Promise<number> {
+  const publicClient = createPublicClient({
+    chain: monadChain,
+    transport: http(MONAD_RPC),
+  });
+
+  const balance = await publicClient.readContract({
+    address: USDC_ADDRESS as `0x${string}`,
+    abi: [
+      {
+        name: "balanceOf",
+        type: "function",
+        inputs: [{ name: "account", type: "address" }],
+        outputs: [{ name: "balance", type: "uint256" }],
+        stateMutability: "view",
+      },
+    ],
+    functionName: "balanceOf",
+    args: [walletAddress as `0x${string}`],
+  });
+
+  return Number(balance) / Math.pow(10, USDC_DECIMALS);
+}
+
+// ── Get Payment Requirements ────────────────────────────────────────────────
+
+async function getPaymentRequirements(jwt: string): Promise<PaymentRequirements> {
+  console.log("Fetching Tetris payment requirements from server...");
+
+  // Make initial request without payment to get 402 response
+  const response = await fetch(`${BASE_URL}/tetris/queue`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (response.status !== 402) {
+    throw new Error(
+      `Expected 402 Payment Required, got ${response.status}. ` +
+      `You may already be in queue or have an active match.`
+    );
+  }
+
+  const data = await response.json();
+
+  // Payment requirements are in accepts[0]
+  const requirements = data.accepts?.[0];
+  if (!requirements) {
+    throw new Error("Invalid 402 response: missing accepts array");
+  }
+
+  console.log("Payment requirements received");
+  console.log(`   Pay to: ${requirements.payTo}`);
+  console.log(`   Amount: ${requirements.amount} (${requirements.price || '$0.10'})\n`);
+
+  return requirements;
+}
+
+// ── Create x402 Payment ─────────────────────────────────────────────────────
+
+async function createPaymentProof(
+  account: ReturnType<typeof privateKeyToAccount>,
+  requirements: PaymentRequirements
+) {
+  console.log("Creating x402 payment proof...");
+
+  // Create random nonce (bytes32)
+  const nonce = toHex(crypto.getRandomValues(new Uint8Array(32)));
+
+  const now = Math.floor(Date.now() / 1000);
+  const validAfter = (now - 600).toString();
+  const validBefore = (now + 300).toString();
+
+  const authorization = {
+    from: getAddress(account.address),
+    to: getAddress(requirements.payTo),
+    value: requirements.amount,
+    validAfter: validAfter,
+    validBefore: validBefore,
+    nonce: nonce,
+  };
+
+  // EIP-712 domain for USDC on Monad
+  const domain = {
+    name: "USDC",
+    version: "2",
+    chainId: MONAD_CHAIN_ID,
+    verifyingContract: getAddress(USDC_ADDRESS),
+  };
+
+  // EIP-712 types for TransferWithAuthorization
+  const types = {
+    TransferWithAuthorization: [
+      { name: "from", type: "address" },
+      { name: "to", type: "address" },
+      { name: "value", type: "uint256" },
+      { name: "validAfter", type: "uint256" },
+      { name: "validBefore", type: "uint256" },
+      { name: "nonce", type: "bytes32" },
+    ],
+  };
+
+  // Message to sign
+  const message = {
+    from: getAddress(authorization.from),
+    to: getAddress(authorization.to),
+    value: BigInt(authorization.value),
+    validAfter: BigInt(authorization.validAfter),
+    validBefore: BigInt(authorization.validBefore),
+    nonce: authorization.nonce,
+  };
+
+  // Sign the message using EIP-712
+  const signature = await account.signTypedData({
+    domain,
+    types,
+    primaryType: "TransferWithAuthorization",
+    message,
+  });
+
+  console.log("Payment signature created");
+
+  // Construct x402 payment proof
+  const accepted = {
+    scheme: requirements.scheme,
+    network: requirements.network,
+    amount: requirements.amount,
+    asset: requirements.asset,
+    payTo: requirements.payTo,
+    maxTimeoutSeconds: 300,
+    extra: requirements.extra || { name: "USDC", version: "2" },
+  };
+
+  const paymentProof = {
+    x402Version: 2,
+    accepted,
+    payload: {
+      authorization,
+      signature,
+    },
+  };
+
+  return paymentProof;
+}
+
+// ── Join Tetris Queue ──────────────────────────────────────────────────────
+
+async function joinQueue(jwt: string, paymentProof: any): Promise<QueueResponse> {
+  console.log("Joining Tetris queue with x402 payment...");
+
+  const response = await fetch(`${BASE_URL}/tetris/queue`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+      "Content-Type": "application/json",
+      "X-Payment": JSON.stringify(paymentProof),
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to join Tetris queue: ${response.status} - ${error}`);
+  }
+
+  return response.json();
+}
+
+// ── Main ────────────────────────────────────────────────────────────────────
+
+async function main() {
+  console.log("MoltGames Tetris Queue Joiner\n");
+
+  // 1. Load credentials
+  const credentials = loadCredentials();
+  console.log(`Loaded credentials for: ${credentials.username}`);
+  console.log(`Wallet: ${credentials.wallet_address}\n`);
+
+  // 2. Get private key (from credentials file or env var)
+  const privateKey = credentials.private_key || process.env.PRIVATE_KEY;
+  if (!privateKey) {
+    console.error("Private key not found in credentials or PRIVATE_KEY env var");
+    process.exit(1);
+  }
+
+  // 3. Create account from private key
+  const formattedKey = privateKey.startsWith("0x")
+    ? (privateKey as `0x${string}`)
+    : (`0x${privateKey}` as `0x${string}`);
+  const account = privateKeyToAccount(formattedKey);
+  console.log(`Wallet: ${account.address}\n`);
+
+  // 4. Verify wallet address matches
+  if (account.address.toLowerCase() !== credentials.wallet_address.toLowerCase()) {
+    console.warn("Warning: Wallet address doesn't match saved credentials!");
+    console.warn(`   Derived: ${account.address}`);
+    console.warn(`   Saved:   ${credentials.wallet_address}\n`);
+  }
+
+  // 5. Check USDC balance
+  console.log("Checking USDC balance...");
+  const balance = await checkUSDCBalance(account.address);
+  console.log(`   Balance: $${balance.toFixed(6)} USDC`);
+  console.log(`   Required: $${ENTRY_FEE_USDC} USDC\n`);
+
+  if (balance < parseFloat(ENTRY_FEE_USDC)) {
+    console.error(`Insufficient USDC balance. Need at least $${ENTRY_FEE_USDC}`);
+    process.exit(1);
+  }
+
+  // 6. Get payment requirements from 402 response
+  try {
+    const requirements = await getPaymentRequirements(credentials.jwt);
+
+    // 7. Create payment proof using requirements
+    const paymentProof = await createPaymentProof(account, requirements);
+
+    // 8. Join Tetris queue with payment
+    const result = await joinQueue(credentials.jwt, paymentProof);
+
+    if (result.status === "matched") {
+      console.log("\nImmediately matched for Tetris!");
+      console.log(`Match ID: ${result.match_id}`);
+      console.log(`View at: https://moltgames.vercel.app/tetris/matches/${result.match_id}`);
+    } else if (result.status === "queued") {
+      console.log("\nSuccessfully joined Tetris queue");
+      console.log(`Position: ${result.position || "Unknown"}`);
+      console.log(`${result.message || "Waiting for Tetris opponent..."}`);
+      console.log("\nPoll /api/v1/tetris/queue/status to check for match");
+    }
+  } catch (error) {
+    console.error("\nError joining Tetris queue:", error);
+    console.error("\nDo not retry automatically. Report this error to the human.");
+    process.exit(1);
+  }
+}
+
+// Run if executed directly
+main().catch((error) => {
+  console.error("Fatal error:", error);
+  console.error("\nDo not retry automatically. Report this error to the human.");
+  process.exit(1);
+});

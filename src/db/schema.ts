@@ -11,7 +11,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
-export const gameTypeEnum = pgEnum("game_type", ["rps", "ttt"]);
+export const gameTypeEnum = pgEnum("game_type", ["rps", "ttt", "tetris"]);
 
 export const matchStatusEnum = pgEnum("match_status", [
   "in_progress",
@@ -170,4 +170,107 @@ export const tttQueue = pgTable(
       .notNull(),
   },
   (table) => [uniqueIndex("ttt_queue_player_id_idx").on(table.playerId)]
+);
+
+// ── Tetris Tables ─────────────────────────────────────────────────────
+
+export const tetrisPieceEnum = pgEnum("tetris_piece", [
+  "I",
+  "O",
+  "T",
+  "S",
+  "Z",
+  "J",
+  "L",
+]);
+
+export const tetrisGames = pgTable(
+  "tetris_games",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    matchId: uuid("match_id")
+      .references(() => matches.id)
+      .notNull(),
+    seed: text("seed").notNull(),
+    // Player 1 state
+    player1Board: varchar("player1_board", { length: 200 })
+      .default(".".repeat(200))
+      .notNull(),
+    player1Score: integer("player1_score").default(0).notNull(),
+    player1Lines: integer("player1_lines").default(0).notNull(),
+    player1Level: integer("player1_level").default(1).notNull(),
+    player1PieceIndex: integer("player1_piece_index").default(0).notNull(),
+    player1PendingGarbage: integer("player1_pending_garbage")
+      .default(0)
+      .notNull(),
+    player1Alive: boolean("player1_alive").default(true).notNull(),
+    player1LastMoveAt: timestamp("player1_last_move_at", {
+      withTimezone: true,
+    })
+      .defaultNow()
+      .notNull(),
+    // Player 2 state
+    player2Board: varchar("player2_board", { length: 200 })
+      .default(".".repeat(200))
+      .notNull(),
+    player2Score: integer("player2_score").default(0).notNull(),
+    player2Lines: integer("player2_lines").default(0).notNull(),
+    player2Level: integer("player2_level").default(1).notNull(),
+    player2PieceIndex: integer("player2_piece_index").default(0).notNull(),
+    player2PendingGarbage: integer("player2_pending_garbage")
+      .default(0)
+      .notNull(),
+    player2Alive: boolean("player2_alive").default(true).notNull(),
+    player2LastMoveAt: timestamp("player2_last_move_at", {
+      withTimezone: true,
+    })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [uniqueIndex("tetris_games_match_id_idx").on(table.matchId)]
+);
+
+export const tetrisMoves = pgTable("tetris_moves", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  matchId: uuid("match_id")
+    .references(() => matches.id)
+    .notNull(),
+  playerId: uuid("player_id")
+    .references(() => players.id)
+    .notNull(),
+  piece: tetrisPieceEnum("piece").notNull(),
+  rotation: integer("rotation").notNull(),
+  column: integer("column").notNull(),
+  linesCleared: integer("lines_cleared").default(0).notNull(),
+  garbageSent: integer("garbage_sent").default(0).notNull(),
+  garbageReceived: integer("garbage_received").default(0).notNull(),
+  scoreAfter: integer("score_after").default(0).notNull(),
+  levelAfter: integer("level_after").default(1).notNull(),
+  boardAfter: varchar("board_after", { length: 200 }).notNull(),
+  moveNumber: integer("move_number").notNull(),
+  isAutoDrop: boolean("is_auto_drop").default(false).notNull(),
+  reasoning: varchar("reasoning", { length: 500 }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const tetrisQueue = pgTable(
+  "tetris_queue",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    playerId: uuid("player_id")
+      .references(() => players.id)
+      .notNull(),
+    walletAddress: text("wallet_address"),
+    paymentReceipt: text("payment_receipt"),
+    eloRating: integer("elo_rating").default(1000).notNull(),
+    joinedAt: timestamp("joined_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [uniqueIndex("tetris_queue_player_id_idx").on(table.playerId)]
 );

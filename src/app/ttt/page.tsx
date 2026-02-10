@@ -87,22 +87,6 @@ export default function TttPage() {
         </div>
       </div>
 
-      {/* Board Positions */}
-      <div className="bg-[var(--surface)] rounded-none border-2 border-[var(--border)] p-6 mb-10 max-w-sm mx-auto neon-border-blue">
-        <h3 className="arcade-heading text-xs font-semibold text-center mb-3 text-gray-400">Board Positions</h3>
-        <div className="grid grid-cols-3 gap-1 w-fit mx-auto">
-          {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div
-              key={i}
-              className="w-14 h-14 flex items-center justify-center text-lg font-mono text-[var(--arcade-blue)] border-2 border-[var(--arcade-blue)]/30 bg-[var(--background)]"
-              style={{ boxShadow: '0 0 4px rgba(68, 136, 255, 0.15)' }}
-            >
-              {i}
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Live TTT Matches */}
       <div className="bg-[var(--surface)] rounded-none border-2 border-[var(--border)] mb-12 overflow-hidden">
         <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between">

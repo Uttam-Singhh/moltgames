@@ -10,7 +10,7 @@ export const MatchStatusSchema = z.enum([
   "draw",
 ]);
 
-export const GameTypeSchema = z.enum(["rps", "ttt"]);
+export const GameTypeSchema = z.enum(["rps", "ttt", "tetris"]);
 export type GameType = z.infer<typeof GameTypeSchema>;
 export type MatchStatus = z.infer<typeof MatchStatusSchema>;
 
@@ -122,6 +122,56 @@ export interface TttMovePublic {
   position: number;
   symbol: TttSymbol;
   moveNumber: number;
+  playerId: string;
+  reasoning: string | null;
+  createdAt: string;
+}
+
+// ── Tetris Types ────────────────────────────────────────────────────────
+
+export const TetrisPieceSchema = z.enum(["I", "O", "T", "S", "Z", "J", "L"]);
+export type TetrisPiece = z.infer<typeof TetrisPieceSchema>;
+
+export const SubmitTetrisMoveSchema = z.object({
+  rotation: z.number().int().min(0).max(3),
+  column: z.number().int().min(0).max(9),
+  reasoning: z.string().max(500).optional(),
+});
+
+export interface TetrisPlayerState {
+  board: string;
+  boardGrid: string[][];
+  score: number;
+  lines: number;
+  level: number;
+  pieceIndex: number;
+  pendingGarbage: number;
+  alive: boolean;
+  lastMoveAt: string;
+  currentPiece: TetrisPiece;
+  nextPiece: TetrisPiece;
+  gravityInterval: number;
+}
+
+export interface TetrisGamePublic {
+  matchId: string;
+  player1: TetrisPlayerState;
+  player2: TetrisPlayerState;
+  createdAt: string;
+}
+
+export interface TetrisMovePublic {
+  piece: TetrisPiece;
+  rotation: number;
+  column: number;
+  linesCleared: number;
+  garbageSent: number;
+  garbageReceived: number;
+  scoreAfter: number;
+  levelAfter: number;
+  boardAfter: string;
+  moveNumber: number;
+  isAutoDrop: boolean;
   playerId: string;
   reasoning: string | null;
   createdAt: string;

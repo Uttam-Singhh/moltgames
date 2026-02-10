@@ -249,11 +249,15 @@ async function processPlayerGravity(
       ? existingMoves[existingMoves.length - 1].moveNumber + 1
       : 1;
 
+  const baseGravityMs = calculateGravityInterval(currentLevel) * 1000;
+  let currentGravityMs = baseGravityMs;
+  const idleSpeedupFactor = 0.75; // each consecutive auto-drop is 25% faster
+  const idleMinMs = 1000; // 1 second floor
+
   while (alive) {
-    const gravityInterval = calculateGravityInterval(currentLevel) * 1000;
     const timeSinceMove = now - currentLastMoveAt;
 
-    if (timeSinceMove < gravityInterval) break;
+    if (timeSinceMove < currentGravityMs) break;
 
     // Auto-drop this piece
     const piece = getPieceAtIndex(seed, currentPieceIndex) as TetrisPiece;
@@ -306,11 +310,14 @@ async function processPlayerGravity(
     currentLevel = result.newLevel;
     currentPieceIndex++;
     currentPendingGarbage = 0;
-    currentLastMoveAt = currentLastMoveAt + gravityInterval;
+    currentLastMoveAt = currentLastMoveAt + currentGravityMs;
     alive = result.alive;
     movesApplied++;
     nextMoveNumber++;
     totalGarbageSent += result.garbageSent;
+
+    // Escalate gravity for consecutive auto-drops (punish idle players)
+    currentGravityMs = Math.max(idleMinMs, currentGravityMs * idleSpeedupFactor);
   }
 
   return {

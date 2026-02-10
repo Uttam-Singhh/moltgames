@@ -45,9 +45,13 @@ export const TETRIS_CONSTANTS = {
   BOARD_SIZE: 200, // 10 * 20
 
   // Gravity (auto-drop interval)
-  BASE_GRAVITY_SECONDS: 30,
-  REDUCTION_PER_LEVEL: 2.5,
-  MIN_GRAVITY_SECONDS: 5,
+  BASE_GRAVITY_SECONDS: 10,
+  REDUCTION_PER_LEVEL: 1,
+  MIN_GRAVITY_SECONDS: 2,
+
+  // Idle penalty: consecutive auto-drops get faster
+  IDLE_SPEEDUP_FACTOR: 0.75, // each consecutive auto-drop is 25% faster
+  IDLE_MIN_INTERVAL_SECONDS: 1, // floor for idle-escalated gravity
 
   // Level progression
   LINES_PER_LEVEL: 10,

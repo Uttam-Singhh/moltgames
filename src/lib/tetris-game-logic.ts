@@ -243,33 +243,16 @@ export function addGarbageLines(
   const grid = boardToGrid(board);
   const rng = createSeededRng(seed + "_garbage_" + counter);
 
-  // Check if top rows that would be pushed off are occupied
+  // Check if any of the top rows that would be pushed off contain content
+  let overflowed = false;
   for (let r = 0; r < numLines && r < BOARD_HEIGHT; r++) {
     if (grid[r].some((cell) => cell !== ".")) {
-      // Board will overflow — push up anyway and mark overflow
-      const garbageRows: string[][] = [];
-      for (let i = 0; i < numLines; i++) {
-        const gapCol = Math.floor(rng() * BOARD_WIDTH);
-        const row = Array(BOARD_WIDTH).fill("G");
-        row[gapCol] = ".";
-        garbageRows.push(row);
-      }
-      const newGrid = [...grid.slice(numLines), ...garbageRows];
-
-      // Check if any cell in top rows is filled after shift
-      let overflowed = false;
-      for (let r2 = 0; r2 < numLines && r2 < BOARD_HEIGHT; r2++) {
-        if (grid[r2].some((cell) => cell !== ".")) {
-          overflowed = true;
-          break;
-        }
-      }
-
-      return { newBoard: gridToBoard(newGrid), overflowed };
+      overflowed = true;
+      break;
     }
   }
 
-  // Safe to push — shift rows up and add garbage at bottom
+  // Build garbage rows
   const garbageRows: string[][] = [];
   for (let i = 0; i < numLines; i++) {
     const gapCol = Math.floor(rng() * BOARD_WIDTH);
@@ -278,8 +261,9 @@ export function addGarbageLines(
     garbageRows.push(row);
   }
 
+  // Shift board up by numLines and add garbage at bottom
   const newGrid = [...grid.slice(numLines), ...garbageRows];
-  return { newBoard: gridToBoard(newGrid), overflowed: false };
+  return { newBoard: gridToBoard(newGrid), overflowed };
 }
 
 // ── Placement Checks ───────────────────────────────────────────────────
@@ -412,9 +396,9 @@ export function applyMove(
     }
   }
 
-  // 2. Place the piece
-  const placedBoard = placePiece(currentBoard, piece, rotation, column);
-  if (!placedBoard) {
+  // 2. Place the piece (get landing cells for top-out check)
+  const landingCells = dropPiece(currentBoard, piece, rotation, column);
+  if (!landingCells) {
     // Can't place — game over
     return {
       newBoard: currentBoard,
@@ -428,6 +412,12 @@ export function applyMove(
     };
   }
 
+  const chars = currentBoard.split("");
+  for (const [r, c] of landingCells) {
+    chars[r * BOARD_WIDTH + c] = piece;
+  }
+  const placedBoard = chars.join("");
+
   // 3. Clear lines
   const { newBoard: clearedBoard, linesCleared } = clearLines(placedBoard);
 
@@ -437,6 +427,9 @@ export function applyMove(
   const newScore = score + calculateScore(linesCleared, newLevel);
   const garbageSent = calculateGarbageSent(linesCleared);
 
+  // 5. Top-out check: if any cell of the piece locked in the top row, game over
+  const toppedOut = landingCells.some(([r]) => r === 0);
+
   return {
     newBoard: clearedBoard,
     linesCleared,
@@ -445,6 +438,6 @@ export function applyMove(
     newScore,
     newLines,
     newLevel,
-    alive: true,
+    alive: !toppedOut,
   };
 }

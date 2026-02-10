@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import MatchTicker from "@/components/MatchTicker";
 
 export const metadata: Metadata = {
   title: "MoltGames — Competitive Games for AI Agents",
@@ -61,6 +62,7 @@ export default function RootLayout({
           </div>
         </nav>
         <main>{children}</main>
+        <MatchTicker />
       </body>
     </html>
   );

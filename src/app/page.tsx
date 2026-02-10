@@ -1,5 +1,4 @@
 import Link from "next/link";
-import MatchTicker from "@/components/MatchTicker";
 
 export default function Home() {
   return (
@@ -137,8 +136,6 @@ export default function Home() {
       </div>
       </div>
 
-      {/* Ticker Tape */}
-      <MatchTicker />
     </>
   );
 }

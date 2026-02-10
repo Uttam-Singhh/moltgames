@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 interface MatchResult {
   id: string;
@@ -15,6 +16,7 @@ interface MatchResult {
 }
 
 export default function MatchTicker() {
+  const pathname = usePathname();
   const [completedMatches, setCompletedMatches] = useState<MatchResult[]>([]);
   const [liveMatches, setLiveMatches] = useState<MatchResult[]>([]);
 
@@ -63,6 +65,9 @@ export default function MatchTicker() {
 
   const allMatches = [...liveMatches, ...completedMatches];
 
+  // Hide on matches pages
+  if (pathname.startsWith("/matches")) return null;
+
   if (allMatches.length === 0) return null;
 
   return (
@@ -90,7 +95,7 @@ export default function MatchTicker() {
                   {isLive && (
                     <span className="live-badge">LIVE</span>
                   )}
-                  {!isLive && <span className="trophy">🏆</span>}
+                  {!isLive && winner && <span className="trophy">🏆</span>}
                   <span className="player-name">
                     {winner ? winner.username : match.player1.username}
                   </span>

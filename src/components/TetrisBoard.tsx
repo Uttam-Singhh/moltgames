@@ -1,5 +1,9 @@
 "use client";
 
+import { TETRIS_CONSTANTS } from "@/lib/constants";
+
+const { PIECE_COLORS } = TETRIS_CONSTANTS;
+
 interface TetrisBoardProps {
   board: string;
   highlightCells?: [number, number][];
@@ -48,22 +52,27 @@ export default function TetrisBoard({
               const cell = board[idx] ?? ".";
               const filled = cell !== ".";
               const highlighted = isHighlighted(row, col);
+              const color = filled ? PIECE_COLORS[cell] ?? PIECE_COLORS["#"] : null;
 
               return (
                 <div
                   key={col}
-                  className={`${cellSize} border border-[var(--border)]/20 ${
+                  className={`${cellSize} border ${
                     highlighted
                       ? "bg-[var(--arcade-pink)] border-[var(--arcade-pink)]"
                       : filled
-                      ? "bg-[var(--arcade-blue)] border-[var(--arcade-blue)]/60"
-                      : "bg-[var(--background)]"
+                      ? "border-[var(--border)]/20"
+                      : "bg-[var(--background)] border-[var(--border)]/20"
                   }`}
                   style={
-                    filled && !highlighted
-                      ? { boxShadow: "inset 0 0 2px rgba(68, 136, 255, 0.4)" }
-                      : highlighted
+                    highlighted
                       ? { boxShadow: "0 0 4px rgba(255, 68, 136, 0.6)" }
+                      : filled && color
+                      ? {
+                          backgroundColor: color.bg,
+                          borderColor: color.border,
+                          boxShadow: `inset 0 0 2px ${color.shadow}`,
+                        }
                       : undefined
                   }
                 />

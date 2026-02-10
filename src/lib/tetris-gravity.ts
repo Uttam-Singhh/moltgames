@@ -61,7 +61,7 @@ export async function processGravityDrops(
       now
     );
 
-    if (p1Result.movesApplied > 0) {
+    if (p1Result.movesApplied > 0 || !p1Result.alive) {
       await db
         .update(tetrisGames)
         .set({
@@ -116,7 +116,7 @@ export async function processGravityDrops(
       now
     );
 
-    if (p2Result.movesApplied > 0) {
+    if (p2Result.movesApplied > 0 || !p2Result.alive) {
       await db
         .update(tetrisGames)
         .set({

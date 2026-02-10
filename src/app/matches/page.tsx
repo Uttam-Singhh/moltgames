@@ -34,7 +34,9 @@ function MatchCard({ match }: { match: MatchSummary }) {
 
   const gameType = match.game_type?.toUpperCase() ?? "RPS";
   const matchUrl =
-    match.game_type === "ttt"
+    match.game_type === "tetris"
+      ? `/tetris/matches/${match.id}`
+      : match.game_type === "ttt"
       ? `/ttt/matches/${match.id}`
       : `/matches/${match.id}`;
 
@@ -54,7 +56,9 @@ function MatchCard({ match }: { match: MatchSummary }) {
 
   const potSize = (parseFloat(match.entry_fee) * 2).toFixed(2);
   const isFinished = match.status === "completed" || match.status === "draw" || match.status === "forfeited";
-  const replayUrl = match.game_type === "ttt"
+  const replayUrl = match.game_type === "tetris"
+    ? `/tetris/matches/${match.id}/replay`
+    : match.game_type === "ttt"
     ? `/ttt/matches/${match.id}/replay`
     : `/matches/${match.id}/replay`;
 
@@ -85,7 +89,9 @@ function MatchCard({ match }: { match: MatchSummary }) {
           <div className="flex items-center gap-2">
             <span
               className={`text-xs px-2 py-0.5 font-bold border ${
-                gameType === "TTT"
+                gameType === "TETRIS"
+                  ? "bg-[var(--success)]/20 text-[var(--success)] border-[var(--success)] neon-border-green"
+                  : gameType === "TTT"
                   ? "bg-[var(--arcade-blue)]/20 text-[var(--arcade-blue)] border-[var(--arcade-blue)] neon-border-blue"
                   : "bg-[var(--arcade-pink)]/20 text-[var(--arcade-pink)] border-[var(--arcade-pink)] neon-border-pink"
               }`}
@@ -255,15 +261,17 @@ export default function MatchesPage() {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    // Fetch live matches from both games
+    // Fetch live matches from all games
     Promise.all([
       fetch("/api/v1/matches/live").then((r) => r.json()),
       fetch("/api/v1/ttt/live").then((r) => r.json()),
+      fetch("/api/v1/tetris/live").then((r) => r.json()),
     ])
-      .then(([rpsData, tttData]) => {
+      .then(([rpsData, tttData, tetrisData]) => {
         const all = [
           ...(rpsData.matches || []),
           ...(tttData.matches || []),
+          ...(tetrisData.matches || []),
         ].sort(
           (a: MatchSummary, b: MatchSummary) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -272,15 +280,17 @@ export default function MatchesPage() {
       })
       .catch(console.error);
 
-    // Fetch past matches from both games
+    // Fetch past matches from all games
     Promise.all([
       fetch(`/api/v1/matches/history?page=${page}&limit=10`).then((r) => r.json()),
       fetch(`/api/v1/ttt/history?page=${page}&limit=10`).then((r) => r.json()),
+      fetch(`/api/v1/tetris/history?page=${page}&limit=10`).then((r) => r.json()),
     ])
-      .then(([rpsData, tttData]) => {
+      .then(([rpsData, tttData, tetrisData]) => {
         const all = [
           ...(rpsData.matches || []),
           ...(tttData.matches || []),
+          ...(tetrisData.matches || []),
         ].sort(
           (a: MatchSummary, b: MatchSummary) =>
             new Date(b.completed_at || b.created_at).getTime() -
@@ -298,11 +308,13 @@ export default function MatchesPage() {
       Promise.all([
         fetch("/api/v1/matches/live").then((r) => r.json()),
         fetch("/api/v1/ttt/live").then((r) => r.json()),
+        fetch("/api/v1/tetris/live").then((r) => r.json()),
       ])
-        .then(([rpsData, tttData]) => {
+        .then(([rpsData, tttData, tetrisData]) => {
           const all = [
             ...(rpsData.matches || []),
             ...(tttData.matches || []),
+            ...(tetrisData.matches || []),
           ].sort(
             (a: MatchSummary, b: MatchSummary) =>
               new Date(b.created_at).getTime() -

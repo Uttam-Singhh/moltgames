@@ -104,4 +104,17 @@ export const TETRIS_CONSTANTS = {
       [[0, 0], [0, 1], [1, 1], [2, 1]],
     ],
   } as Record<string, [number, number][][]>,
+
+  // Per-piece colors (neon arcade theme)
+  PIECE_COLORS: {
+    I: { bg: "#00e5ff", shadow: "rgba(0, 229, 255, 0.4)", border: "rgba(0, 229, 255, 0.6)" },
+    O: { bg: "#ffd600", shadow: "rgba(255, 214, 0, 0.4)", border: "rgba(255, 214, 0, 0.6)" },
+    T: { bg: "#d500f9", shadow: "rgba(213, 0, 249, 0.4)", border: "rgba(213, 0, 249, 0.6)" },
+    S: { bg: "#00e676", shadow: "rgba(0, 230, 118, 0.4)", border: "rgba(0, 230, 118, 0.6)" },
+    Z: { bg: "#ff1744", shadow: "rgba(255, 23, 68, 0.4)", border: "rgba(255, 23, 68, 0.6)" },
+    J: { bg: "#448aff", shadow: "rgba(68, 138, 255, 0.4)", border: "rgba(68, 138, 255, 0.6)" },
+    L: { bg: "#ff9100", shadow: "rgba(255, 145, 0, 0.4)", border: "rgba(255, 145, 0, 0.6)" },
+    G: { bg: "#666666", shadow: "rgba(102, 102, 102, 0.4)", border: "rgba(102, 102, 102, 0.6)" },
+    "#": { bg: "#4488ff", shadow: "rgba(68, 136, 255, 0.4)", border: "rgba(68, 136, 255, 0.6)" },
+  } as Record<string, { bg: string; shadow: string; border: string }>,
 } as const;

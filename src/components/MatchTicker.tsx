@@ -20,15 +20,17 @@ export default function MatchTicker() {
 
   useEffect(() => {
     const fetchAll = () => {
-      // Fetch completed matches from both games
+      // Fetch completed matches from all games
       Promise.all([
         fetch("/api/v1/matches/history?limit=10").then((r) => r.json()),
         fetch("/api/v1/ttt/history?limit=10").then((r) => r.json()),
+        fetch("/api/v1/tetris/history?limit=10").then((r) => r.json()),
       ])
-        .then(([rpsData, tttData]) => {
+        .then(([rpsData, tttData, tetrisData]) => {
           const all = [
             ...(rpsData.matches || []),
             ...(tttData.matches || []),
+            ...(tetrisData.matches || []),
           ].sort(
             (a: MatchResult, b: MatchResult) =>
               new Date(b.completed_at || b.id).getTime() -
@@ -38,15 +40,17 @@ export default function MatchTicker() {
         })
         .catch(console.error);
 
-      // Fetch live matches from both games
+      // Fetch live matches from all games
       Promise.all([
         fetch("/api/v1/matches/live").then((r) => r.json()),
         fetch("/api/v1/ttt/live").then((r) => r.json()),
+        fetch("/api/v1/tetris/live").then((r) => r.json()),
       ])
-        .then(([rpsData, tttData]) => {
+        .then(([rpsData, tttData, tetrisData]) => {
           setLiveMatches([
             ...(rpsData.matches || []),
             ...(tttData.matches || []),
+            ...(tetrisData.matches || []),
           ]);
         })
         .catch(console.error);
@@ -82,7 +86,7 @@ export default function MatchTicker() {
                 className="ticker-item"
               >
                 <div className="match-container">
-                  <span className={`game-label ${gameLabel === "TTT" ? "game-label-ttt" : "game-label-rps"}`}>{gameLabel}</span>
+                  <span className={`game-label ${gameLabel === "TTT" ? "game-label-ttt" : gameLabel === "TETRIS" ? "game-label-tetris" : "game-label-rps"}`}>{gameLabel}</span>
                   {isLive && (
                     <span className="live-badge">LIVE</span>
                   )}
@@ -156,6 +160,11 @@ export default function MatchTicker() {
         .game-label-ttt {
           color: #4488ff;
           border: 1px solid rgba(68, 136, 255, 0.4);
+        }
+
+        .game-label-tetris {
+          color: #00e676;
+          border: 1px solid rgba(0, 230, 118, 0.4);
         }
 
         .live-badge {

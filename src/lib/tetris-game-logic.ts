@@ -201,7 +201,7 @@ export function placePiece(
 
   const chars = board.split("");
   for (const [r, c] of cells) {
-    chars[r * BOARD_WIDTH + c] = "#";
+    chars[r * BOARD_WIDTH + c] = piece;
   }
   return chars.join("");
 }
@@ -250,7 +250,7 @@ export function addGarbageLines(
       const garbageRows: string[][] = [];
       for (let i = 0; i < numLines; i++) {
         const gapCol = Math.floor(rng() * BOARD_WIDTH);
-        const row = Array(BOARD_WIDTH).fill("#");
+        const row = Array(BOARD_WIDTH).fill("G");
         row[gapCol] = ".";
         garbageRows.push(row);
       }
@@ -273,7 +273,7 @@ export function addGarbageLines(
   const garbageRows: string[][] = [];
   for (let i = 0; i < numLines; i++) {
     const gapCol = Math.floor(rng() * BOARD_WIDTH);
-    const row = Array(BOARD_WIDTH).fill("#");
+    const row = Array(BOARD_WIDTH).fill("G");
     row[gapCol] = ".";
     garbageRows.push(row);
   }

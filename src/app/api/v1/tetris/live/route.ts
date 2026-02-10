@@ -52,6 +52,7 @@ export async function GET() {
           id: m.id,
           game_type: "tetris",
           player1: {
+            id: m.player1Id,
             username: playerMap.get(m.player1Id)?.username ?? "Unknown",
             avatar_url: playerMap.get(m.player1Id)?.avatarUrl ?? null,
             score: game?.player1Score ?? 0,
@@ -60,6 +61,7 @@ export async function GET() {
             alive: game?.player1Alive ?? true,
           },
           player2: {
+            id: m.player2Id,
             username: playerMap.get(m.player2Id)?.username ?? "Unknown",
             avatar_url: playerMap.get(m.player2Id)?.avatarUrl ?? null,
             score: game?.player2Score ?? 0,
@@ -67,6 +69,9 @@ export async function GET() {
             level: game?.player2Level ?? 1,
             alive: game?.player2Alive ?? true,
           },
+          player1_score: game?.player1Score ?? 0,
+          player2_score: game?.player2Score ?? 0,
+          winner_id: m.winnerId,
           status: m.status,
           entry_fee: m.entryFee,
           created_at: m.createdAt.toISOString(),

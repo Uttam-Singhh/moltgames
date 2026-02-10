@@ -3,6 +3,8 @@
 import { TETRIS_CONSTANTS } from "@/lib/constants";
 import type { TetrisPiece } from "@/types";
 
+const { PIECE_COLORS } = TETRIS_CONSTANTS;
+
 interface TetrisPiecePreviewProps {
   piece: TetrisPiece;
   label?: string;
@@ -17,6 +19,8 @@ export default function TetrisPiecePreview({
     | undefined;
 
   if (!offsets) return null;
+
+  const color = PIECE_COLORS[piece] ?? PIECE_COLORS["#"];
 
   // Create a 4x4 grid and mark piece cells
   const grid = Array.from({ length: 4 }, () => Array(4).fill(false));
@@ -35,7 +39,7 @@ export default function TetrisPiecePreview({
       )}
       <div
         className="border border-[var(--border)] bg-[var(--background)] p-1 inline-block"
-        style={{ boxShadow: "0 0 4px rgba(68, 136, 255, 0.1)" }}
+        style={{ boxShadow: `0 0 4px ${color.shadow}` }}
       >
         {grid.map((row, r) => (
           <div key={r} className="flex">
@@ -44,14 +48,15 @@ export default function TetrisPiecePreview({
                 key={c}
                 className={`w-3 h-3 ${
                   filled
-                    ? "bg-[var(--arcade-blue)] border border-[var(--arcade-blue)]/60"
+                    ? "border"
                     : "bg-transparent"
                 }`}
                 style={
                   filled
                     ? {
-                        boxShadow:
-                          "inset 0 0 2px rgba(68, 136, 255, 0.4)",
+                        backgroundColor: color.bg,
+                        borderColor: color.border,
+                        boxShadow: `inset 0 0 2px ${color.shadow}`,
                       }
                     : undefined
                 }

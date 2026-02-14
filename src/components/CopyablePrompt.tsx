@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 export default function CopyablePrompt({
   text,
   color = "var(--accent)",
@@ -7,26 +9,34 @@ export default function CopyablePrompt({
   text: string;
   color?: string;
 }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
   return (
     <div className="mt-4">
       <p className="text-xs text-gray-500 text-center mb-2">Tell your agent:</p>
-      <button
-        onClick={() => navigator.clipboard.writeText(text)}
-        className="w-full group relative bg-[var(--surface-light)] border border-[var(--border)] px-4 py-2.5 text-left transition-all"
-        style={{ borderColor: undefined }}
-        onMouseEnter={(e) => (e.currentTarget.style.borderColor = color)}
-        onMouseLeave={(e) => (e.currentTarget.style.borderColor = "")}
+      <div
+        className="flex items-center gap-2 bg-[var(--surface-light)] border border-[var(--border)] px-4 py-2.5 cursor-pointer group transition-all hover:brightness-110"
+        onClick={handleCopy}
       >
-        <code className="text-sm" style={{ color }}>
+        <code className="text-sm flex-1 break-all" style={{ color }}>
           {text}
         </code>
         <span
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 transition-colors group-hover:brightness-125"
-          style={{ color: undefined }}
+          className="flex-shrink-0 text-xs font-mono px-2 py-1 border transition-all"
+          style={{
+            color: copied ? "var(--success)" : color,
+            borderColor: copied ? "var(--success)" : "var(--border)",
+          }}
         >
-          copy
+          {copied ? "copied!" : "copy"}
         </span>
-      </button>
+      </div>
     </div>
   );
 }

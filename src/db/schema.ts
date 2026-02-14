@@ -126,16 +126,24 @@ export const tttGames = pgTable(
     matchId: uuid("match_id")
       .references(() => matches.id)
       .notNull(),
+    roundNumber: integer("round_number").default(1).notNull(),
     board: varchar("board", { length: 9 }).default("---------").notNull(),
     currentTurn: uuid("current_turn")
       .references(() => players.id)
       .notNull(),
     moveCount: integer("move_count").default(0).notNull(),
+    winnerId: uuid("winner_id").references(() => players.id),
+    isDraw: boolean("is_draw").default(false).notNull(),
     lastMoveAt: timestamp("last_move_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
   },
-  (table) => [uniqueIndex("ttt_games_match_id_idx").on(table.matchId)]
+  (table) => [
+    uniqueIndex("ttt_games_match_round_idx").on(
+      table.matchId,
+      table.roundNumber
+    ),
+  ]
 );
 
 export const tttMoves = pgTable("ttt_moves", {
@@ -143,6 +151,7 @@ export const tttMoves = pgTable("ttt_moves", {
   matchId: uuid("match_id")
     .references(() => matches.id)
     .notNull(),
+  roundNumber: integer("round_number").default(1).notNull(),
   playerId: uuid("player_id")
     .references(() => players.id)
     .notNull(),

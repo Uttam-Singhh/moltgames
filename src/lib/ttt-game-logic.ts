@@ -49,3 +49,39 @@ export function boardToGrid(board: string): string[][] {
     [board[6], board[7], board[8]],
   ];
 }
+
+export function checkTttMatchEnd(
+  p1Score: number,
+  p2Score: number,
+  currentRound: number
+): {
+  ended: boolean;
+  reason?: "win" | "sudden_death_win";
+} {
+  // First to POINTS_TO_WIN (4) wins
+  if (
+    p1Score >= TTT_CONSTANTS.POINTS_TO_WIN ||
+    p2Score >= TTT_CONSTANTS.POINTS_TO_WIN
+  ) {
+    return { ended: true, reason: "win" };
+  }
+
+  // Past max rounds — sudden death. Any score difference resolves the match.
+  if (currentRound > TTT_CONSTANTS.MAX_ROUNDS) {
+    if (p1Score !== p2Score) {
+      return { ended: true, reason: "sudden_death_win" };
+    }
+  }
+
+  return { ended: false };
+}
+
+export function isTttSuddenDeath(
+  p1Score: number,
+  p2Score: number,
+  currentRound: number
+): boolean {
+  return (
+    currentRound >= TTT_CONSTANTS.MAX_ROUNDS && p1Score === p2Score
+  );
+}

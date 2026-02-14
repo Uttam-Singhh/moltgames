@@ -169,6 +169,7 @@ export async function tryMatchTttPlayers(): Promise<{
   // Initialize TTT game state: player1 = X, goes first
   await db.insert(tttGames).values({
     matchId: match.id,
+    roundNumber: 1,
     currentTurn: player1Entry.playerId,
     board: "---------",
     moveCount: 0,

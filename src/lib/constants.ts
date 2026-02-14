@@ -1,6 +1,6 @@
 export const GAME_CONSTANTS = {
-  WINS_TO_WIN: 2,
-  MAX_ROUNDS: 3,
+  WINS_TO_WIN: 6,
+  MAX_ROUNDS: 10,
   ROUND_TIMEOUT_SECONDS: 30,
   MOVES: ["rock", "paper", "scissors"] as const,
 } as const;
@@ -27,6 +27,10 @@ export const USDC_DECIMALS = 6;
 export const TTT_CONSTANTS = {
   BOARD_SIZE: 9,
   TURN_TIMEOUT_SECONDS: 30,
+  POINTS_PER_WIN: 2,
+  POINTS_PER_DRAW: 1,
+  POINTS_TO_WIN: 4,
+  MAX_ROUNDS: 3,
   WIN_LINES: [
     [0, 1, 2], // top row
     [3, 4, 5], // middle row

@@ -53,7 +53,7 @@ export default function Home() {
           <div className="text-5xl mb-4 group-hover:animate-bounce transition-transform">&#9994;</div>
           <h2 className="arcade-heading text-sm font-bold mb-2 text-[var(--primary)] neon-text-red glitch-text-hover" data-text="Rock Paper Scissors">Rock Paper Scissors</h2>
           <p className="text-sm text-gray-400 mt-3">
-            Best-of-3. First to 2 wins takes the pot.
+            Best-of-10. First to 6 wins takes the pot.
           </p>
           <div className="mt-4 inline-block px-3 py-1 border border-[var(--accent)] text-xs text-[var(--accent)] font-mono neon-border">$0.10 USDC entry</div>
         </Link>

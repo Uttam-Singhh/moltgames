@@ -4,7 +4,7 @@ import { handleApiError, ApiError } from "@/lib/errors";
 import { db } from "@/db";
 import { matches, tttGames, tttMoves, players } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
-import { boardToGrid } from "@/lib/ttt-game-logic";
+import { boardToGrid, isTttSuddenDeath } from "@/lib/ttt-game-logic";
 import { checkAndResolveTttTimeout } from "@/lib/ttt-timeout";
 
 export async function GET(
@@ -62,28 +62,67 @@ export async function GET(
       .where(eq(players.id, match.player2Id))
       .limit(1);
 
-    // Get TTT game state
-    const [game] = await db
+    // Get ALL TTT game rows for this match (ordered by roundNumber)
+    const allGames = await db
       .select()
       .from(tttGames)
       .where(eq(tttGames.matchId, match_id))
-      .limit(1);
+      .orderBy(asc(tttGames.roundNumber));
 
-    // Get all moves
-    const moves = await db
+    // Get ALL moves grouped by round
+    const allMoves = await db
       .select()
       .from(tttMoves)
       .where(eq(tttMoves.matchId, match_id))
-      .orderBy(asc(tttMoves.moveNumber));
+      .orderBy(asc(tttMoves.roundNumber), asc(tttMoves.moveNumber));
 
-    const formattedMoves = moves.map((m) => ({
-      position: m.position,
-      symbol: m.symbol,
-      move_number: m.moveNumber,
-      player_id: m.playerId,
-      reasoning: m.reasoning,
-      created_at: m.createdAt.toISOString(),
-    }));
+    // Current round game
+    const currentGame = allGames.find(
+      (g) => g.roundNumber === match.currentRound
+    );
+
+    // Build rounds array
+    const rounds = allGames.map((g) => {
+      const roundMoves = allMoves
+        .filter((m) => m.roundNumber === g.roundNumber)
+        .map((m) => ({
+          position: m.position,
+          symbol: m.symbol,
+          move_number: m.moveNumber,
+          player_id: m.playerId,
+          reasoning: m.reasoning,
+          created_at: m.createdAt.toISOString(),
+        }));
+
+      return {
+        round_number: g.roundNumber,
+        board: g.board,
+        board_grid: boardToGrid(g.board),
+        move_count: g.moveCount,
+        current_turn: g.currentTurn,
+        winner_id: g.winnerId,
+        is_draw: g.isDraw,
+        moves: roundMoves,
+      };
+    });
+
+    // Flat moves for current round (backward compat)
+    const currentRoundMoves = allMoves
+      .filter((m) => m.roundNumber === match.currentRound)
+      .map((m) => ({
+        position: m.position,
+        symbol: m.symbol,
+        move_number: m.moveNumber,
+        player_id: m.playerId,
+        reasoning: m.reasoning,
+        created_at: m.createdAt.toISOString(),
+      }));
+
+    const suddenDeath = isTttSuddenDeath(
+      match.player1Score,
+      match.player2Score,
+      match.currentRound
+    );
 
     return NextResponse.json({
       id: match.id,
@@ -104,12 +143,20 @@ export async function GET(
       },
       status: match.status,
       winner_id: match.winnerId,
-      board: game?.board ?? "---------",
-      board_grid: boardToGrid(game?.board ?? "---------"),
-      current_turn: game?.currentTurn ?? null,
-      move_count: game?.moveCount ?? 0,
-      last_move_at: game?.lastMoveAt?.toISOString() ?? null,
-      moves: formattedMoves,
+      // Current round fields (backward compat)
+      board: currentGame?.board ?? "---------",
+      board_grid: boardToGrid(currentGame?.board ?? "---------"),
+      current_turn: currentGame?.currentTurn ?? null,
+      move_count: currentGame?.moveCount ?? 0,
+      last_move_at: currentGame?.lastMoveAt?.toISOString() ?? null,
+      moves: currentRoundMoves,
+      // Multi-round fields
+      player1_score: match.player1Score,
+      player2_score: match.player2Score,
+      current_round: match.currentRound,
+      sudden_death: suddenDeath,
+      rounds,
+      // Match metadata
       entry_fee: match.entryFee,
       payout_tx: match.payoutTx,
       player1_elo_change: match.player1EloChange,

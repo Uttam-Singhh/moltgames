@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { matches, tttGames, players } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { calculateEloChange } from "./elo";
 import { sendPayout } from "./x402";
 import { ENTRY_FEE_USDC, TTT_CONSTANTS } from "./constants";
@@ -26,7 +26,12 @@ export async function checkAndResolveTttTimeout(
   const [game] = await db
     .select()
     .from(tttGames)
-    .where(eq(tttGames.matchId, matchId))
+    .where(
+      and(
+        eq(tttGames.matchId, matchId),
+        eq(tttGames.roundNumber, match.currentRound)
+      )
+    )
     .limit(1);
 
   if (!game) return null;

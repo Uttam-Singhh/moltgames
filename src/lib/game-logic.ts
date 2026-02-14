@@ -23,7 +23,7 @@ export function checkMatchEnd(
   ended: boolean;
   reason?: "win" | "sudden_death_win";
 } {
-  // First to 2 wins (best of 3)
+  // First to 6 wins (best of 10)
   if (
     player1Score >= GAME_CONSTANTS.WINS_TO_WIN ||
     player2Score >= GAME_CONSTANTS.WINS_TO_WIN

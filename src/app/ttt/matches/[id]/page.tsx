@@ -6,7 +6,26 @@ import Link from "next/link";
 import PlayerCard from "@/components/PlayerCard";
 import TttBoard from "@/components/TttBoard";
 import TttMoveHistory from "@/components/TttMoveHistory";
+import TttRoundHistory from "@/components/TttRoundHistory";
 import { TTT_CONSTANTS } from "@/lib/constants";
+
+interface TttRoundData {
+  round_number: number;
+  board: string;
+  board_grid: string[][];
+  move_count: number;
+  current_turn: string | null;
+  winner_id: string | null;
+  is_draw: boolean;
+  moves: Array<{
+    position: number;
+    symbol: string;
+    move_number: number;
+    player_id: string;
+    reasoning: string | null;
+    created_at: string;
+  }>;
+}
 
 interface TttMatchData {
   id: string;
@@ -40,6 +59,11 @@ interface TttMatchData {
     reasoning: string | null;
     created_at: string;
   }>;
+  player1_score: number;
+  player2_score: number;
+  current_round: number;
+  sudden_death: boolean;
+  rounds: TttRoundData[];
   entry_fee: string;
   payout_tx: string | null;
   player1_elo_change: number | null;
@@ -63,6 +87,7 @@ export default function TttMatchPage() {
   const [match, setMatch] = useState<TttMatchData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedRound, setSelectedRound] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchMatch = () => {
@@ -111,10 +136,20 @@ export default function TttMatchPage() {
       ? match.player1
       : match.player2
     : null;
-  const winningLine = getWinningLine(match.board);
+
+  // Determine which round's data to display
+  const displayRound = selectedRound
+    ? match.rounds.find((r) => r.round_number === selectedRound)
+    : match.rounds.find((r) => r.round_number === match.current_round);
+
+  const displayBoard = displayRound?.board ?? match.board;
+  const displayMoves = displayRound?.moves ?? match.moves;
+  const displayMoveCount = displayRound?.move_count ?? match.move_count;
+
+  const winningLine = getWinningLine(displayBoard);
   const lastMove =
-    match.moves.length > 0
-      ? match.moves[match.moves.length - 1]
+    displayMoves.length > 0
+      ? displayMoves[displayMoves.length - 1]
       : null;
   const currentTurnPlayer =
     match.current_turn === match.player1.id
@@ -124,6 +159,9 @@ export default function TttMatchPage() {
       : null;
   const potSize = (parseFloat(match.entry_fee) * 2).toFixed(2);
 
+  const isViewingPastRound =
+    selectedRound !== null && selectedRound !== match.current_round;
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       {/* Status Banner */}
@@ -131,10 +169,17 @@ export default function TttMatchPage() {
         {isLive ? (
           <div className="bg-[var(--arcade-blue)]/10 border-2 border-[var(--arcade-blue)] p-4 text-center neon-border-blue">
             <span className="inline-block w-3 h-3 rounded-full bg-[var(--success)] animate-pulse mr-2" style={{ boxShadow: '0 0 8px var(--success)' }} />
-            <span className="font-semibold arcade-heading text-xs text-[var(--arcade-blue)]">LIVE</span>
-            {currentTurnPlayer && (
+            <span className="font-semibold arcade-heading text-xs text-[var(--arcade-blue)]">
+              {match.sudden_death ? "SUDDEN DEATH" : `ROUND ${match.current_round}`}
+            </span>
+            {currentTurnPlayer && !isViewingPastRound && (
               <span className="text-gray-400 ml-2">
-                - {currentTurnPlayer.username}&apos;s turn ({currentTurnPlayer.symbol})
+                - {currentTurnPlayer.username}&apos;s turn ({currentTurnPlayer === match.player1 ? "X" : "O"})
+              </span>
+            )}
+            {isViewingPastRound && (
+              <span className="text-gray-400 ml-2">
+                - Viewing Round {selectedRound}
               </span>
             )}
           </div>
@@ -186,6 +231,7 @@ export default function TttMatchPage() {
             eloRating={match.player1.elo_rating}
             isWinner={match.winner_id === match.player1.id}
             eloChange={match.player1_elo_change}
+            score={match.player1_score}
           />
         </div>
         <div>
@@ -198,30 +244,70 @@ export default function TttMatchPage() {
             eloRating={match.player2.elo_rating}
             isWinner={match.winner_id === match.player2.id}
             eloChange={match.player2_elo_change}
+            score={match.player2_score}
           />
         </div>
       </div>
 
       {/* Board */}
       <div className="bg-[var(--surface)] border-2 border-[var(--border)] p-6 mb-6 neon-border-blue">
+        {isViewingPastRound && (
+          <div className="text-center mb-3">
+            <span className="text-xs px-2 py-1 border border-[var(--arcade-blue)] bg-[var(--arcade-blue)]/20 text-[var(--arcade-blue)] arcade-heading">
+              ROUND {selectedRound}
+            </span>
+          </div>
+        )}
         <TttBoard
-          board={match.board}
+          board={displayBoard}
           lastMovePosition={lastMove?.position}
           winningLine={winningLine}
         />
         <div className="text-center mt-4 text-sm text-gray-500 font-mono">
-          Move {match.move_count} | Pot: ${potSize} USDC
+          {isViewingPastRound
+            ? `Round ${selectedRound} - ${displayMoveCount} moves`
+            : `Round ${match.current_round} - Move ${displayMoveCount}`
+          }
+          {" | "}Pot: ${potSize} USDC
         </div>
       </div>
+
+      {/* Round History */}
+      {match.rounds.length > 1 && (
+        <div className="bg-[var(--surface)] border-2 border-[var(--border)] overflow-hidden mb-6">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
+            <h3 className="arcade-heading text-xs font-semibold text-[var(--arcade-blue)]">Round History</h3>
+            {selectedRound !== null && (
+              <button
+                onClick={() => setSelectedRound(null)}
+                className="text-xs text-[var(--arcade-blue)] hover:text-[var(--accent)] transition-colors"
+              >
+                View Current
+              </button>
+            )}
+          </div>
+          <div className="p-4">
+            <TttRoundHistory
+              rounds={match.rounds}
+              player1={match.player1}
+              player2={match.player2}
+              selectedRound={selectedRound}
+              onSelectRound={setSelectedRound}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Move History */}
       <div className="bg-[var(--surface)] border-2 border-[var(--border)] overflow-hidden">
         <div className="px-4 py-3 border-b border-[var(--border)]">
-          <h3 className="arcade-heading text-xs font-semibold text-[var(--arcade-blue)]">Move History</h3>
+          <h3 className="arcade-heading text-xs font-semibold text-[var(--arcade-blue)]">
+            {isViewingPastRound ? `Round ${selectedRound} Moves` : "Move History"}
+          </h3>
         </div>
         <div className="p-4 max-h-96 overflow-y-auto">
           <TttMoveHistory
-            moves={match.moves}
+            moves={displayMoves}
             player1={match.player1}
             player2={match.player2}
           />

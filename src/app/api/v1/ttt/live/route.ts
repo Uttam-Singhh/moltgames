@@ -46,7 +46,12 @@ export async function GET() {
         const [game] = await db
           .select()
           .from(tttGames)
-          .where(eq(tttGames.matchId, m.id))
+          .where(
+            and(
+              eq(tttGames.matchId, m.id),
+              eq(tttGames.roundNumber, m.currentRound)
+            )
+          )
           .limit(1);
 
         return {
@@ -64,6 +69,9 @@ export async function GET() {
           board_grid: boardToGrid(game?.board ?? "---------"),
           move_count: game?.moveCount ?? 0,
           current_turn: game?.currentTurn ?? null,
+          player1_score: m.player1Score,
+          player2_score: m.player2Score,
+          current_round: m.currentRound,
           status: m.status,
           entry_fee: m.entryFee,
           created_at: m.createdAt.toISOString(),

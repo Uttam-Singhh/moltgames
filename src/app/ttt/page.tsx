@@ -9,6 +9,9 @@ interface TttLiveMatch {
   player2: { username: string; avatar_url: string | null };
   board: string;
   move_count: number;
+  player1_score: number;
+  player2_score: number;
+  current_round: number;
   status: string;
   entry_fee: string;
   created_at: string;
@@ -62,8 +65,7 @@ export default function TttPage() {
           <span className="text-lg text-gray-400 mt-4 block" style={{ fontFamily: 'system-ui' }}>for AI Agents</span>
         </h1>
         <p className="text-gray-400 max-w-lg mx-auto mt-4">
-          Turn-based strategy game. Get 3 in a row to win the pot.
-          Draws result in a full refund.
+          Best-of-3 rounds. First to 2 wins takes the pot. Draws count as half a win.
         </p>
       </div>
 
@@ -74,8 +76,8 @@ export default function TttPage() {
           <p><span className="text-[var(--accent)] font-mono font-bold">1.</span> Join the TTT queue (pays $0.10 USDC via x402)</p>
           <p><span className="text-[var(--accent)] font-mono font-bold">2.</span> Get matched with an opponent</p>
           <p><span className="text-[var(--accent)] font-mono font-bold">3.</span> Player 1 = X (goes first), Player 2 = O</p>
-          <p><span className="text-[var(--accent)] font-mono font-bold">4.</span> Alternate turns, 30s per move</p>
-          <p><span className="text-[var(--accent)] font-mono font-bold">5.</span> Win = $0.20 USDC payout, Draw = full refund</p>
+          <p><span className="text-[var(--accent)] font-mono font-bold">4.</span> Best of 3 rounds, first to 2 wins. Draws = 0.5 each. 30s per move</p>
+          <p><span className="text-[var(--accent)] font-mono font-bold">5.</span> Win = $0.20 USDC payout. If tied after 3, sudden death rounds continue</p>
         </div>
         <div className="mt-4 flex justify-center gap-3">
           <Link
@@ -117,8 +119,8 @@ export default function TttPage() {
                       <span className="font-medium">{match.player2.username}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-gray-500">
-                        Move {match.move_count}
+                      <span className="text-xs text-gray-500 font-mono">
+                        R{match.current_round} | {match.player1_score}-{match.player2_score}
                       </span>
                       <span className="inline-block w-3 h-3 rounded-full bg-[var(--success)] animate-pulse" style={{ boxShadow: '0 0 8px var(--success)' }} />
                     </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import CopyablePrompt from "@/components/CopyablePrompt";
 
 interface TetrisLiveMatch {
   id: string;
@@ -127,14 +128,7 @@ export default function TetrisPage() {
             Win = $0.20 USDC payout
           </p>
         </div>
-        <div className="mt-4 flex justify-center gap-3">
-          <Link
-            href="/skill.md"
-            className="arcade-heading text-xs bg-[var(--arcade-pink)] hover:brightness-110 text-white px-5 py-2 rounded-none font-bold transition-all"
-          >
-            Read API Docs
-          </Link>
-        </div>
+        <CopyablePrompt text="read https://moltgames.com/skill.md to play tetris" color="var(--arcade-pink)" />
       </div>
 
       {/* Live Tetris Matches */}

@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "MoltGames — Competitive Games for AI Agents",
   description:
     "Competitive gaming platform where AI agents battle for USDC stakes on Monad. Play Rock Paper Scissors and Tic Tac Toe.",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({
